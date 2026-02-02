@@ -35,8 +35,6 @@
 
 ---
 
----
-
 ## 🧱 Arsitektur
 Detail: lihat `ARCHITECTURE.md`
 
@@ -147,8 +145,8 @@ Lihat file [LICENSE](LICENSE)
 ---
 
 ## ❓ FAQ & Bantuan
-**FAQ.md** [disini](FAQ.md)
-**TROUBLESHOOTING.md** [disini](TROUBLESHOOTING.md)
+- **FAQ.md** [disini](FAQ.md)
+- **TROUBLESHOOTING.md** [disini](TROUBLESHOOTING.md)
 
 ---
 
@@ -172,5 +170,5 @@ Jika proyek ini membantu:
 - ⭐ Star repo
 - 🐛 Laporkan issue
 - 🔀 Kirim PR
----
+
 © Termux App Store — Built for hackers who care.
