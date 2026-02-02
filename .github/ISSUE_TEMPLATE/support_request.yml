@@ -1,0 +1,54 @@
+name: 🆘 Support / Help Request
+description: Ajukan pertanyaan atau minta bantuan terkait Termux App Store.
+title: "[HELP] "
+labels: question
+assignees: []
+
+body:
+  - type: markdown
+    content: |
+      Terima kasih sudah mengajukan pertanyaan! Silakan isi semua field agar tim dapat membantu Anda dengan cepat.
+
+  - type: input
+    id: issue_title
+    attributes:
+      label: Judul Masalah / Pertanyaan
+      placeholder: Misal: Gagal install paket X
+      required: true
+
+  - type: textarea
+    id: issue_description
+    attributes:
+      label: Deskripsi Masalah / Pertanyaan
+      placeholder: Jelaskan masalah secara rinci, langkah yang sudah dicoba, dan hasilnya.
+      required: true
+
+  - type: textarea
+    id: steps_to_reproduce
+    attributes:
+      label: Langkah Reproduksi (Jika Ada)
+      placeholder: Misal: 1. buka termux-app-store 2. klik install paket X
+
+  - type: textarea
+    id: expected_behavior
+    attributes:
+      label: Hasil yang Diharapkan
+      placeholder: Misal: Paket berhasil terinstall tanpa error
+
+  - type: textarea
+    id: actual_behavior
+    attributes:
+      label: Hasil Sebenarnya
+      placeholder: Misal: Muncul error "package not found"
+
+  - type: input
+    id: termux_version
+    attributes:
+      label: Termux Version
+      placeholder: Misal: 0.145
+
+  - type: input
+    id: android_version
+    attributes:
+      label: Android Version
+      placeholder: Misal: 12

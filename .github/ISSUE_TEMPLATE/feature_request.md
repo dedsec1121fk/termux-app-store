@@ -1,20 +1,28 @@
----
-name: Feature request
-about: Suggest an idea for this project
-title: ''
-labels: ''
-assignees: ''
+# ✨ Permintaan Fitur / Feature Request
+
+Gunakan template ini untuk mengusulkan fitur baru atau peningkatan pada Termux App Store. Mohon jelaskan dengan rinci agar tim dapat memahami kebutuhan Anda.
+
+Sebelum membuat permintaan fitur, silakan baca **[CONTRIBUTING.md](./CONTRIBUTING.md)** dan pertimbangkan untuk memeriksa **[FAQ.md](./FAQ.md)**. Diskusi juga bisa dilakukan melalui **[GitHub Discussions](https://github.com/djunekz/termux-app-store/discussions)**.
 
 ---
 
-**Is your feature request related to a problem? Please describe.**
-A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
+**Nama / Username:**  
+Misal: @djunekz
 
-**Describe the solution you'd like**
-A clear and concise description of what you want to happen.
+**Versi Termux App Store:**  
+Misal: 1.0.3 / versi binary / versi py
 
-**Describe alternatives you've considered**
-A clear and concise description of any alternative solutions or features you've considered.
+**Deskripsi Fitur / Usulan:**  
+Tuliskan fitur baru atau perbaikan yang diinginkan secara rinci.
 
-**Additional context**
-Add any other context or screenshots about the feature request here.
+**Alasan / Manfaat:**  
+Jelaskan mengapa fitur ini penting atau bagaimana akan membantu pengguna.
+
+**Referensi / Contoh (Opsional):**  
+Tambahkan contoh, screenshot, atau referensi jika relevan.
+
+**Prioritas / Tingkat Urgensi:**  
+Misal: Tinggi / Sedang / Rendah
+
+**Catatan Tambahan (Opsional):**  
+Informasi tambahan yang bisa membantu tim memahami fitur yang diusulkan.

@@ -1,0 +1,90 @@
+name: 🐞 Bug Report
+description: Laporkan bug atau error di Termux App Store dengan lengkap.
+title: "[BUG] "
+labels: bug
+assignees: []
+
+body:
+  - type: markdown
+    content: |
+      Terima kasih sudah melaporkan bug! Silakan isi semua field di bawah agar tim bisa menindaklanjuti dengan cepat.
+
+  - type: input
+    id: description
+    attributes:
+      label: Deskripsi Bug
+      placeholder: Misal: Termux App Store crash saat memilih paket tertentu
+      required: true
+
+  - type: input
+    id: package_feature
+    attributes:
+      label: Paket / Fitur Terkait
+      placeholder: Misal: Instalasi paket, pencarian, panel list, progress bar, dll.
+      required: true
+
+  - type: dropdown
+    id: termux_version
+    attributes:
+      label: Termux Version
+      options:
+        - "0.144"
+        - "0.145"
+        - "Lainnya"
+      description: Pilih versi Termux yang digunakan
+      required: true
+
+  - type: input
+    id: android_version
+    attributes:
+      label: Android Version
+      placeholder: Misal: 12
+      required: true
+
+  - type: dropdown
+    id: architecture
+    attributes:
+      label: Device Architecture
+      options:
+        - "aarch64"
+        - "armv7l"
+        - "x86_64"
+        - "Lainnya"
+      required: true
+
+  - type: input
+    id: app_version
+    attributes:
+      label: Termux App Store Version
+      placeholder: Misal: 1.0.5
+      required: true
+
+  - type: textarea
+    id: reproduction_steps
+    attributes:
+      label: Langkah Reproduksi
+      description: Jelaskan langkah seminimal mungkin agar bug bisa direproduksi.
+      placeholder: |
+        1. Buka Termux App Store
+        2. Pilih paket "abc"
+        3. Klik Install / Update
+      required: true
+
+  - type: textarea
+    id: expected_behavior
+    attributes:
+      label: Hasil yang Diharapkan
+      placeholder: Misal: Paket berhasil terinstal tanpa crash, log muncul normal, dll.
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Log / Screenshot
+      placeholder: Paste log terminal atau lampirkan screenshot jika ada.
+
+  - type: textarea
+    id: additional_context
+    attributes:
+      label: Konteks Tambahan
+      placeholder: Misal: koneksi offline, cache hilang, path custom, dll.
