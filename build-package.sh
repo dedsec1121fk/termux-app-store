@@ -1,17 +1,14 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -e
 
 PACKAGE="$1"
 ROOT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PACKAGES_DIR="$ROOT_DIR/packages"
-CACHE_DIR="$ROOT_DIR/cache"
 PREFIX="${PREFIX:-/data/data/com.termux/files/usr}"
 BUILD_DIR="$PACKAGES_DIR/$PACKAGE"
 WORK_DIR="$ROOT_DIR/build/$PACKAGE"
 DEB_DIR="$ROOT_DIR/output"
-TMP_DIR="$HOME/tmp"
-
-mkdir -p "$TMP_DIR" "$CACHE_DIR"
+CACHE_DIR="$ROOT_DIR/cache"
 
 if [[ -z "$PACKAGE" ]]; then
     echo "Usage: $0 <package-name>"
@@ -22,7 +19,6 @@ BUILD_SH="$BUILD_DIR/build.sh"
 [[ -f "$BUILD_SH" ]] || { echo "build.sh not found"; exit 1; }
 
 # ---------------- LOAD METADATA ----------------
-# shellcheck disable=SC1090
 source "$BUILD_SH"
 
 # ---------------- ARCH ----------------
@@ -41,13 +37,13 @@ echo "==> Installing dependencies..."
 
 # ---------------- DIRS ----------------
 rm -rf "$WORK_DIR"
-mkdir -p "$WORK_DIR/src" "$WORK_DIR/pkg" "$DEB_DIR"
+mkdir -p "$WORK_DIR/src" "$WORK_DIR/pkg" "$DEB_DIR" "$CACHE_DIR"
 
 # ---------------- DOWNLOAD ----------------
 echo "==> Downloading source..."
 SRC_FILE="$CACHE_DIR/${PACKAGE}_$(basename $TERMUX_PKG_SRCURL)"
 if [[ ! -f "$SRC_FILE" ]]; then
-    curl -fL --progress-bar "$TERMUX_PKG_SRCURL" -o "$SRC_FILE"
+    curl -fL "$TERMUX_PKG_SRCURL" -o "$SRC_FILE"
 else
     echo "[*] Using cached source: $SRC_FILE"
 fi
@@ -66,37 +62,25 @@ if [[ -n "${TERMUX_PKG_SHA256:-}" ]]; then
     echo "[✔] SHA256 valid"
 fi
 
-# ---------------- EXTRACT ----------------
-echo "==> Extracting source..."
+# ---------------- EXTRACT / HANDLE .deb ----------------
 if [[ "$TERMUX_PKG_SRCURL" == *.deb ]]; then
-    echo "[*] Source is .deb, skipping extraction."
-    SRC_ROOT="$SRC_FILE"
+    echo "[*] Source is a .deb package, skipping extraction."
+    SRC_IS_DEB=true
 else
-    mkdir -p "$WORK_DIR/src"
+    echo "==> Extracting source..."
     if [[ "$TERMUX_PKG_SRCURL" == *.zip ]]; then
         unzip -q "$SRC_FILE" -d "$WORK_DIR/src"
     else
         tar -xf "$SRC_FILE" -C "$WORK_DIR/src"
     fi
-
-    # Tentukan SRC_ROOT
-    FOLDER_COUNT=$(find "$WORK_DIR/src" -mindepth 1 -maxdepth 1 -type d | wc -l)
-    if [[ "$FOLDER_COUNT" -eq 1 ]]; then
-        SRC_ROOT="$(find "$WORK_DIR/src" -mindepth 1 -maxdepth 1 -type d | head -n1)"
+    SRC_ROOT="$(find "$WORK_DIR/src" -mindepth 1 -maxdepth 1 -type d | head -n1 || true)"
+    if [[ -n "$SRC_ROOT" ]]; then
         mv "$SRC_ROOT" "$WORK_DIR/src/root"
-        SRC_ROOT="$WORK_DIR/src/root"
     else
-        # Bisa jadi tar hanya file tunggal
-        SRC_FILE_ONLY=$(find "$WORK_DIR/src" -mindepth 1 -maxdepth 1 ! -type d | head -n1)
-        if [[ -n "$SRC_FILE_ONLY" ]]; then
-            mkdir -p "$WORK_DIR/src/root"
-            mv "$SRC_FILE_ONLY" "$WORK_DIR/src/root/"
-            SRC_ROOT="$WORK_DIR/src/root"
-        else
-            # fallback: ambil semua isi src
-            SRC_ROOT="$WORK_DIR/src"
-        fi
+        mkdir -p "$WORK_DIR/src/root"
+        cp -r "$WORK_DIR/src/"* "$WORK_DIR/src/root/"
     fi
+    SRC_IS_DEB=false
 fi
 
 # ---------------- ENV ----------------
@@ -105,36 +89,12 @@ export TERMUX_PKG_SRCDIR="$WORK_DIR/src/root"
 export DESTDIR="$WORK_DIR/pkg"
 
 # ---------------- INSTALL ----------------
-if [[ "$TERMUX_PKG_SRCURL" == *.deb ]]; then
-    echo "[*] Installing binary from .deb..."
-    TMP_EXTRACT="$TMP_DIR/debcheck_$PACKAGE"
-    rm -rf "$TMP_EXTRACT"
-    mkdir -p "$TMP_EXTRACT"
-    dpkg-deb -x "$SRC_FILE" "$TMP_EXTRACT"
-
-    # Copy binaries
-    BIN_DIR="$TMP_EXTRACT/data/data/com.termux/files/usr/bin"
-    if [[ -d "$BIN_DIR" ]]; then
-        for BIN in "$BIN_DIR"/*; do
-            cp "$BIN" "$PREFIX/bin/"
-            chmod +x "$PREFIX/bin/$(basename "$BIN")"
-            echo "[✔] Installed binary: $PREFIX/bin/$(basename "$BIN")"
-        done
-    else
-        echo "[!] Warning: No binaries directory found in .deb"
-    fi
-
-    # Copy Python libs
-    PY_LIB_DIR="$TMP_EXTRACT/data/data/com.termux/files/usr/lib/python3.12"
-    if [[ -d "$PY_LIB_DIR" ]]; then
-        mkdir -p "$PREFIX/lib/python3.12"
-        cp -r "$PY_LIB_DIR/"* "$PREFIX/lib/python3.12/"
-        echo "[✔] Installed Python libraries"
-    fi
-
+if [[ "$SRC_IS_DEB" == true ]]; then
+    echo "==> Installing binary from .deb..."
+    dpkg -x "$SRC_FILE" "$WORK_DIR/pkg"
 else
     echo "==> Running install (DESTDIR)..."
-    termux_step_make_install
+    termux_step_make_install || true
 fi
 
 # ---------------- CONTROL ----------------
