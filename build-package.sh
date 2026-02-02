@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -e
+set -euo pipefail
 
 PACKAGE="$1"
 ROOT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -8,7 +8,6 @@ PREFIX="${PREFIX:-/data/data/com.termux/files/usr}"
 BUILD_DIR="$PACKAGES_DIR/$PACKAGE"
 WORK_DIR="$ROOT_DIR/build/$PACKAGE"
 DEB_DIR="$ROOT_DIR/output"
-CACHE_DIR="$ROOT_DIR/cache"
 
 if [[ -z "$PACKAGE" ]]; then
     echo "Usage: $0 <package-name>"
@@ -16,7 +15,7 @@ if [[ -z "$PACKAGE" ]]; then
 fi
 
 BUILD_SH="$BUILD_DIR/build.sh"
-[[ -f "$BUILD_SH" ]] || { echo "build.sh not found"; exit 1; }
+[[ -f "$BUILD_SH" ]] || { echo "[FATAL] build.sh not found for $PACKAGE"; exit 1; }
 
 # ---------------- LOAD METADATA ----------------
 source "$BUILD_SH"
@@ -27,7 +26,7 @@ case "$(uname -m)" in
     armv7l)  ARCH="arm" ;;
     x86_64)  ARCH="x86_64" ;;
     i686)    ARCH="i686" ;;
-    *) echo "Unsupported arch"; exit 1 ;;
+    *) echo "[FATAL] Unsupported arch"; exit 1 ;;
 esac
 echo "==> Architecture detected: $ARCH"
 
@@ -35,16 +34,14 @@ echo "==> Architecture detected: $ARCH"
 echo "==> Installing dependencies..."
 [[ -n "${TERMUX_PKG_DEPENDS:-}" ]] && pkg install -y $(tr ',' ' ' <<<"$TERMUX_PKG_DEPENDS")
 
-# ---------------- DIRS ----------------
+# ---------------- CLEAN / DIRS ----------------
 rm -rf "$WORK_DIR"
-mkdir -p "$WORK_DIR/src" "$WORK_DIR/pkg" "$DEB_DIR" "$CACHE_DIR"
+mkdir -p "$WORK_DIR/src" "$WORK_DIR/pkg" "$DEB_DIR"
 
 # ---------------- DOWNLOAD ----------------
 echo "==> Downloading source..."
-SRC_FILE="$CACHE_DIR/${PACKAGE}_$(basename "$TERMUX_PKG_SRCURL")"
-if [[ ! -f "$SRC_FILE" ]]; then
-    curl -fL "$TERMUX_PKG_SRCURL" -o "$SRC_FILE"
-fi
+SRC_FILE="$WORK_DIR/source"
+curl -fL "$TERMUX_PKG_SRCURL" -o "$SRC_FILE"
 
 # ---------------- SHA256 ----------------
 if [[ -n "${TERMUX_PKG_SHA256:-}" ]]; then
@@ -54,7 +51,6 @@ if [[ -n "${TERMUX_PKG_SHA256:-}" ]]; then
         echo "[FATAL] SHA256 mismatch!"
         echo "Expected: $TERMUX_PKG_SHA256"
         echo "Got     : $CALC_SHA256"
-        rm -f "$SRC_FILE"
         exit 1
     fi
     echo "[✔] SHA256 valid"
@@ -62,52 +58,90 @@ fi
 
 # ---------------- EXTRACT ----------------
 echo "==> Extracting source..."
-SRC_DEST="$WORK_DIR/src"
-
-if [[ "$SRC_FILE" == *.deb ]]; then
-    echo "[*] Source is a .deb package, skipping extraction."
-elif [[ "$SRC_FILE" == *.zip ]]; then
-    unzip -q "$SRC_FILE" -d "$SRC_DEST"
+PREBUILT_DEB=""
+if [[ "$TERMUX_PKG_SRCURL" == *.deb ]]; then
+    echo "[*] Prebuilt .deb detected, skipping extraction."
+    PREBUILT_DEB="$SRC_FILE"
+    SRC_ROOT="$WORK_DIR/src"
+elif [[ "$TERMUX_PKG_SRCURL" == *.zip ]]; then
+    unzip -q "$SRC_FILE" -d "$WORK_DIR/src"
+    SRC_ROOT="$(find "$WORK_DIR/src" -mindepth 1 -maxdepth 1 -type d | head -n1)"
 else
-    tar -xf "$SRC_FILE" -C "$SRC_DEST"
+    tar -xf "$SRC_FILE" -C "$WORK_DIR/src"
+    SRC_ROOT="$(find "$WORK_DIR/src" -mindepth 1 -maxdepth 1 -type d | head -n1)"
 fi
-
-# Tentukan SRC_ROOT
-SRC_ROOT_CANDIDATES=( $(find "$SRC_DEST" -mindepth 1 -maxdepth 1 -type d) )
-if [[ ${#SRC_ROOT_CANDIDATES[@]} -eq 1 ]]; then
-    SRC_ROOT="${SRC_ROOT_CANDIDATES[0]}"
-else
-    SRC_ROOT="$SRC_DEST"
-fi
-
-export TERMUX_PKG_SRCDIR="$SRC_ROOT"
-echo "[*] Source root: $TERMUX_PKG_SRCDIR"
+echo "[*] Source root: $SRC_ROOT"
 
 # ---------------- ENV ----------------
 export TERMUX_PREFIX="$PREFIX"
-DESTDIR="$WORK_DIR/pkg"
+export TERMUX_PKG_SRCDIR="$SRC_ROOT"
+export DESTDIR="$WORK_DIR/pkg"
 
 # ---------------- INSTALL ----------------
-if [[ "$SRC_FILE" == *.deb ]]; then
-    echo "[*] Installing binary from .deb..."
-    dpkg -x "$SRC_FILE" "$DESTDIR"
+echo "==> Running install (DESTDIR)..."
+
+if [[ -n "$PREBUILT_DEB" ]]; then
+    echo "[*] Installing prebuilt .deb..."
+    dpkg -x "$PREBUILT_DEB" "$WORK_DIR/pkg"
+
+    BIN_FILE="$(find "$WORK_DIR/pkg" -type f -name "$PACKAGE*" -executable | head -n1 || true)"
+    if [[ -n "$BIN_FILE" ]]; then
+        mkdir -p "$PREFIX/lib/$PACKAGE"
+        mv "$BIN_FILE" "$PREFIX/lib/$PACKAGE/$PACKAGE"
+        chmod +x "$PREFIX/lib/$PACKAGE/$PACKAGE"
+
+        cat > "$PREFIX/bin/$PACKAGE" <<EOF
+#!/usr/bin/env bash
+exec "$PREFIX/lib/$PACKAGE/$PACKAGE" "\$@"
+EOF
+        chmod +x "$PREFIX/bin/$PACKAGE"
+        echo "[✔] $PACKAGE installed and executable at $PREFIX/bin/$PACKAGE"
+    else
+        echo "[!] No executable found in prebuilt .deb, skipping wrapper."
+    fi
+
 elif [[ -f "$SRC_ROOT/Cargo.toml" ]]; then
-    echo "[*] Rust project detected, building with cargo..."
-    cargo build --release
-    BIN_NAME="${PACKAGE}"  # bisa diubah jika nama binary beda
-    mkdir -p "$DESTDIR/bin"
-    install -Dm700 "target/release/$BIN_NAME" "$DESTDIR/bin/$BIN_NAME"
+    echo "[*] Rust source detected, building..."
+    case "$ARCH" in
+        aarch64) RUST_TARGET="aarch64-linux-android" ;;
+        arm)     RUST_TARGET="armv7-linux-androideabi" ;;
+        x86_64)  RUST_TARGET="x86_64-linux-android" ;;
+        i686)    RUST_TARGET="i686-linux-android" ;;
+    esac
+    cargo build --release --target "$RUST_TARGET" --manifest-path "$SRC_ROOT/Cargo.toml"
+    BIN_PATH="$SRC_ROOT/target/$RUST_TARGET/release/$PACKAGE"
+    [[ -f "$BIN_PATH" ]] || { echo "[FATAL] Binary not found: $BIN_PATH"; exit 1; }
+    install -Dm700 "$BIN_PATH" "$TERMUX_PREFIX/bin/$PACKAGE"
+
 else
-    if declare -f termux_step_make_install >/dev/null 2>&1; then
-        echo "==> Running install (DESTDIR)..."
+    if type termux_step_make_install &>/dev/null; then
+        echo "[*] Using termux_step_make_install() from build.sh..."
         termux_step_make_install
     else
-        echo "[!] No install method found, skipping."
+        MAIN_FILE="$(find "$SRC_ROOT" -maxdepth 1 -type f -perm /111 | head -n1 || true)"
+        if [[ -z "$MAIN_FILE" ]]; then
+            MAIN_FILE="$(find "$SRC_ROOT" -maxdepth 1 -type f \( -name '*.py' -o -name '*.sh' \) | head -n1 || true)"
+        fi
+        if [[ -n "$MAIN_FILE" ]]; then
+            BASENAME="$(basename "$MAIN_FILE")"
+            mkdir -p "$PREFIX/lib/$PACKAGE"
+            cp "$MAIN_FILE" "$PREFIX/lib/$PACKAGE/$BASENAME"
+            chmod +x "$PREFIX/lib/$PACKAGE/$BASENAME"
+
+            cat > "$PREFIX/bin/$PACKAGE" <<EOF
+#!/usr/bin/env bash
+exec "$PREFIX/lib/$PACKAGE/$BASENAME" "\$@"
+EOF
+            chmod +x "$PREFIX/bin/$PACKAGE"
+            echo "[✔] Wrapper created: $PREFIX/bin/$PACKAGE -> $BASENAME"
+        else
+            echo "[!] No executable/main file found in $SRC_ROOT, skipping install."
+        fi
     fi
 fi
 
 # ---------------- CONTROL ----------------
-CONTROL_DIR="$DESTDIR/DEBIAN"
+CONTROL_DIR="$WORK_DIR/pkg/DEBIAN"
 mkdir -p "$CONTROL_DIR"
 chmod 0755 "$CONTROL_DIR"
 
@@ -126,9 +160,9 @@ chmod 0644 "$CONTROL_DIR/control"
 # ---------------- BUILD DEB ----------------
 DEB_FILE="$DEB_DIR/${PACKAGE}_${TERMUX_PKG_VERSION}_${ARCH}.deb"
 echo "==> Building deb: $(basename "$DEB_FILE")"
-dpkg-deb --build "$DESTDIR" "$DEB_FILE"
+dpkg-deb --build "$WORK_DIR/pkg" "$DEB_FILE"
 
-# ---------------- INSTALL ----------------
+# ---------------- INSTALL DEB ----------------
 echo "==> Installing package..."
 dpkg -i "$DEB_FILE"
 
