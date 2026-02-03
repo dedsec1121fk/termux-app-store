@@ -27,7 +27,7 @@ git checkout -b contoh
 Struktur umum:
 ```Text
 packages/<nama-package>/
-└── build.sh
+             └── build.sh
 ```
 Contoh:
 ```Bash
