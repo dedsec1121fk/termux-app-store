@@ -17,12 +17,8 @@ jobs:
 
       - name: Scan packages and prepare changelog entries
         run: |
-          set -euo pipefail
-
           CHANGELOG="CHANGELOG.md"
           PACKAGES_DIR="packages"
-
-          [[ -f "$CHANGELOG" ]] || echo -e "# Changelog\n\n## [Unreleased]\n" > "$CHANGELOG"
 
           ADDED=""
           CHANGED=""
@@ -39,13 +35,11 @@ jobs:
             PKG_VERSION=$(grep "^TERMUX_PKG_VERSION=" "$BUILD_FILE" | cut -d'=' -f2 | tr -d '"')
 
             if [[ -z "$PKG_VERSION" ]]; then
-              echo "⚠️ Skipping $PKG_NAME: TERMUX_PKG_VERSION not found"
+              echo "Skipping $PKG_NAME: TERMUX_PKG_VERSION not found"
               continue
             fi
 
-            SAFE_NAME=$(printf '%s\n' "$PKG_NAME v$PKG_VERSION" | sed 's/[\/&]/\\&/g')
-
-            if ! sed -n '/## \[Unreleased\]/,/^## /p' "$CHANGELOG" | grep -q "$SAFE_NAME"; then
+            if ! sed -n '/## \[Unreleased\]/,/^## /p' "$CHANGELOG" | grep -q "$PKG_NAME v$PKG_VERSION"; then
               ADDED="$ADDED- Package \`$PKG_NAME\` v$PKG_VERSION"$'\n'
             fi
           done
@@ -63,9 +57,9 @@ jobs:
             local section="$1"
             local content="$2"
             if grep -q "### $section" "$CHANGELOG"; then
-              sed -i "/### $section/a $(printf '%s' "$content")" "$CHANGELOG"
+              sed -i "/### $section/a\\$content" "$CHANGELOG"
             else
-              sed -i "/## \[Unreleased\]/a ### $section\n$(printf '%s' "$content")" "$CHANGELOG"
+              sed -i "/## \[Unreleased\]/a ### $section\n$content" "$CHANGELOG"
             fi
           }
 
@@ -73,7 +67,7 @@ jobs:
           [[ -n "$CHANGED" ]] && insert_section "Changed" "$CHANGED"
           [[ -n "$FIXED" ]] && insert_section "Fixed" "$FIXED"
 
-      - name: Commit changelog updates (only if changed)
+      - name: Commit changelog updates
         run: |
           git config user.name "Termux App Store"
           git config user.email "258516621+termux-app-store@users.noreply.github.com"
