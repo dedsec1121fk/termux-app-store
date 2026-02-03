@@ -191,8 +191,9 @@ Upload tool ke Termux App Store dibuat untuk:
 Keuntungan bagi yang punya tool di Termux App Store:
 - Update tool hanya mengubah versi dan sha256 di build.sh
 
-Cara upload tool:
-klik dan baca [HOW_TO_UPLOAD](HOW_TO_UPLOAD.md)
+**Cara upload tool**:
+- klik dan baca [HOW_TO_UPLOAD](HOW_TO_UPLOAD.md)
+
 ---
 
 ## 👤 Maintainer / Developer
