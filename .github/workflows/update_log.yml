@@ -56,18 +56,17 @@ jobs:
           insert_section() {
             local section="$1"
             local content="$2"
+            TMP=$(mktemp)
 
-            # escape characters & / \ untuk sed
-            local safe_content
-            safe_content=$(printf '%s\n' "$content" | sed 's/[&/\]/\\&/g')
+            sed '/## \[Unreleased\]/q' "$CHANGELOG" > "$TMP"
 
-            if grep -q "### $section" "$CHANGELOG"; then
-              # append di bawah section
-              sed -i "/### $section/a $safe_content" "$CHANGELOG"
-            else
-              # buat section baru di bawah [Unreleased]
-              sed -i "/## \[Unreleased\]/a ### $section\n$safe_content" "$CHANGELOG"
-            fi
+            echo "## [Unreleased]" >> "$TMP"
+            echo "### $section" >> "$TMP"
+            printf '%s\n' "$content" >> "$TMP"
+
+            sed '1,/## \[Unreleased\]/d' "$CHANGELOG" >> "$TMP"
+
+            mv "$TMP" "$CHANGELOG"
           }
 
           [[ -n "$ADDED" ]] && insert_section "Added" "$ADDED"
