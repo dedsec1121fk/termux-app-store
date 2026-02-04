@@ -21,7 +21,6 @@ jobs:
           CHANGELOG="CHANGELOG.md"
           PACKAGES_DIR="packages"
 
-          # Buat file CHANGELOG.md kalau belum ada
           [[ -f "$CHANGELOG" ]] || echo -e "# Changelog\n\n## [Unreleased]\n" > "$CHANGELOG"
 
           ADDED=""
@@ -55,7 +54,7 @@ jobs:
 
       - name: Commit and push changelog updates
         env:
-          PAT_TOKEN: ${{ secrets.TERMUXAPPSTORE }}
+          PAT_TOKEN: ${{ secrets.termuxappstore }}
         run: |
           git config user.name "Termux App Store"
           git config user.email "258516621+users.noreply.github.com"
