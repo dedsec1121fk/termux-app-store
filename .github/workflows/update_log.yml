@@ -54,7 +54,7 @@ jobs:
 
       - name: Commit and push changelog updates
         env:
-          TERMUX_APP_STORE: ${{ secrets.TERMUXAPPSTORE }}  # simpan Personal Access Token di Secrets
+          TERMUX_APP_STORE: ${{ secrets.termuxappstore }}
         run: |
           git config user.name "Termux App Store"
           git config user.email "258516621+users.noreply.github.com"
