@@ -61,7 +61,7 @@ jobs:
           git add CHANGELOG.md
           if ! git diff --cached --quiet; then
             git commit -m "Update changelog: new package versions"
-            git push https://${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git HEAD:master
+            git push https://${TERMUXAPPSTORE}@github.com/${GITHUB_REPOSITORY}.git HEAD:master
           else
             echo "No changes to commit."
           fi
