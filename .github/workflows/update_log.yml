@@ -53,7 +53,7 @@ jobs:
           rm "$TMP"
       - name: Commit and push changelog updates
         env:
-          PAT_TOKEN: ${{ secrets.termuxappstore }}
+          PAT_TOKEN: ${{ secrets.TERMUXAPPSTORE }}
         run: |
           git config user.name "Termux App Store"
           git config user.email "258516621+users.noreply.github.com"
