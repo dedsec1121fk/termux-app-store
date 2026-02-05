@@ -13,33 +13,33 @@ case "$COMMAND" in
 
     lint|-l|-L)
         shift
-        exec "$BASE_DIR/tools/termux-build-lint.sh" "$@"
+        exec "$BASE_DIR/termux-build-lint.sh" "$@"
         ;;
 
     check-pr|-cpr|-pr)
-        exec "$BASE_DIR/tools/termux-build-check-pr.sh" "$@"
+        exec "$BASE_DIR/termux-build-check-pr.sh" "$@"
         ;;
 
     doctor|-d|-D)
-        exec "$BASE_DIR/tools/termux-build-doctor.sh"
+        exec "$BASE_DIR/termux-build-doctor.sh"
         ;;
 
     suggest|-s|-S)
         shift
-        exec "$BASE_DIR/tools/termux-build-suggest.sh" "$@"
+        exec "$BASE_DIR/termux-build-suggest.sh" "$@"
         ;;
 
     explain|-e|-E|-ex)
         shift
-        exec "$BASE_DIR/tools/termux-build-explain.sh" "$@"
+        exec "$BASE_DIR/termux-build-explain.sh" "$@"
         ;;
 
     template|-t|-T)
-        exec "$BASE_DIR/tools/termux-build-template.sh"
+        exec "$BASE_DIR/termux-build-template.sh"
         ;;
 
     guide|-g|-G)
-        exec "$BASE_DIR/tools/termux-build-guide.sh"
+        exec "$BASE_DIR/termux-build-guide.sh"
         ;;
 
     *)
