@@ -21,6 +21,19 @@ This project follows community-driven standards including:
 
 **Termux App Store** adalah **TUI (Terminal User Interface)** berbasis **Textual (Python)** yang memungkinkan pengguna Termux untuk **menelusuri, membangun, dan mengelola aplikasi** dari skrip build secara lokal — tanpa akun, tanpa telemetry, dan tanpa ketergantungan cloud.
 
+> ℹ️ **Catatan penting**
+> Termux App Store **bukan repository biner terpusat** dan **bukan installer otomatis tersembunyi**.  
+> Semua build dijalankan **secara lokal, transparan, dan atas kendali penuh pengguna**.
+
+---
+
+## 👥 Who Is This For?
+
+- Pengguna Termux yang ingin **kontrol penuh atas build**
+- Developer yang mendistribusikan tool via **source-based packaging**
+- Reviewer & auditor build script
+- Maintainer yang mengelola banyak package Termux
+
 ---
 
 ## ✨ Fitur Utama
@@ -177,9 +190,10 @@ Lihat file [LICENSE](LICENSE)
 ---
 
 ## ❓ FAQ & Bantuan
-- **FAQ.md** [disini](FAQ.md)
-- **TROUBLESHOOTING.md** [disini](TROUBLESHOOTING.md)
-- **HOW_TO_UPLOAD.md** [disini](HOW_TO_UPLOAD.md)
+- **FAQ**: [disini](FAQ.md)
+- **TROUBLESHOOTING**: [disini](TROUBLESHOOTING.md)
+- **HOW TO UPLOAD**: [disini](HOW_TO_UPLOAD.md)
+- **SUPPORT**: [disini](SUPPORT.md)
 
 ---
 
@@ -205,8 +219,8 @@ Upload tool ke Termux App Store dibuat untuk:
 
 ## 👤 Maintainer / Developer
 Independent Developer and Official Developer:
-- Name: [Djunekz](https://github.com/djunekz)
-- Email: gab288.gab288@passinbox.com
+- Djunekz
+- Github : [https://github.com/djunekz](https://github.com/djunekz)
 
 ---
 
