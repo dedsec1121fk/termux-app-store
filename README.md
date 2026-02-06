@@ -1,7 +1,7 @@
 # Termux App Store
 
 ![CI](https://github.com/djunekz/termux-app-store/actions/workflows/build.yml/badge.svg)
-[![Coverage](https://img.shields.io/codecov/c/github/djunekz/termux-app-store.svg?logo=coveralls)](https://codecov.io/gh/djunekz/termux-app-store)
+[![Codecov](https://codecov.io/github/djunekz/termux-app-store/branch/master/graph/badge.svg?token=357W4EP8G0)](https://codecov.io/github/djunekz/termux-app-store)
 [![Version](https://img.shields.io/github/v/release/djunekz/termux-app-store.svg?logo=iterm2&style=flat-square)](https://github.com/djunekz/termux-app-store/releases)
 [![License](https://img.shields.io/github/license/djunekz/termux-app-store.svg?logo=homepage&style=flat-square)](https://github.com/djunekz/termux-app-store/blob/master/LICENSE)
 ![Issues](https://img.shields.io/github/issues/djunekz/termux-app-store?logo=openbugbounty&style=flat-square)
