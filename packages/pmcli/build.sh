@@ -5,7 +5,7 @@ TERMUX_PKG_MAINTAINER="Djunekz <gab288.gab288@passinbox.com>"
 TERMUX_PKG_VERSION=0.1.0
 TERMUX_PKG_SRCURL=https://github.com/djunekz/pmcli/archive/refs/tags/v${TERMUX_PKG_VERSION}.tar.gz
 #TERMUX_PKG_SRCURL=https://github.com/djunekz/pmcli/releases/download/v${TERMUX_PKG_VERSION}/pmcli-${TERMUX_PKG_VERSION}.tar.gz
-TERMUX_PKG_SHA256=b2e24af39111a75eacfdd195950423108c6c01b5caeed923a904b835a572dc53
+TERMUX_PKG_SHA256=d5558cd419c8d46bdc958064cb97f963d1ea793866414c025906ec15033512ed
 TERMUX_PKG_BUILD_IN_SRC=true
 TERMUX_PKG_DEPENDS="rust, openssl, zlib"
 
