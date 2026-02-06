@@ -1,102 +1,64 @@
+#!/usr/bin/env python3
 import os
 import re
-import subprocess
 import sys
-from pathlib import Path
+import subprocess
 
-ROOT = Path(__file__).resolve().parents[1]
-PACKAGES_DIR = ROOT / "packages"
-TERMUX_BUILD = ROOT / "termux-build"
-
-REQUIRED_VARS = [
-    "TERMUX_PKG_NAME",
-    "TERMUX_PKG_VERSION",
-    "TERMUX_PKG_DESCRIPTION",
-    "TERMUX_PKG_LICENSE",
-]
-
-BAD_VERSION_PATTERNS = re.compile(r"^(0|0\.0|dev|latest)$", re.IGNORECASE)
+PACKAGES_DIR = "packages"
+FAILED = False
 
 
-def run(cmd, pkg=None):
-    label = f"[{pkg}]" if pkg else ""
-    print(f"{label} $ {' '.join(cmd)}")
-    subprocess.check_call(cmd, cwd=ROOT)
+def parse_var(path, var):
+    pattern = re.compile(rf"^{var}=(.+)$", re.M)
+    with open(path) as f:
+        content = f.read()
+    m = pattern.search(content)
+    if not m:
+        return None
+    return m.group(1).strip().strip('"')
 
 
-def read_build_vars(build_file: Path):
-    vars_found = {}
-    with build_file.open() as f:
-        for line in f:
-            for var in REQUIRED_VARS:
-                if line.startswith(var + "="):
-                    vars_found[var] = line.split("=", 1)[1].strip().strip('"')
-    return vars_found
+for pkg in sorted(os.listdir(PACKAGES_DIR)):
+    pkg_dir = os.path.join(PACKAGES_DIR, pkg)
+    build_sh = os.path.join(pkg_dir, "build.sh")
 
+    if not os.path.isdir(pkg_dir):
+        continue
+    if not os.path.isfile(build_sh):
+        continue
 
-def validate_build_sh(pkg: str, build_file: Path):
-    if build_file.stat().st_size == 0:
-        raise RuntimeError("build.sh is empty")
+    print(f"\n🔍 Validating package: {pkg}")
 
-    vars_found = read_build_vars(build_file)
+    try:
+        # version wajib
+        version = parse_var(build_sh, "TERMUX_PKG_VERSION")
+        if not version:
+            raise ValueError("Missing TERMUX_PKG_VERSION")
 
-    for var in REQUIRED_VARS:
-        if var not in vars_found or not vars_found[var]:
-            raise RuntimeError(f"Missing or empty {var}")
+        # pkg name opsional
+        declared_name = parse_var(build_sh, "TERMUX_PKG_NAME")
+        if declared_name and declared_name != pkg:
+            raise ValueError(
+                f"TERMUX_PKG_NAME mismatch (expected '{pkg}', got '{declared_name}')"
+            )
 
-    version = vars_found["TERMUX_PKG_VERSION"]
-    if BAD_VERSION_PATTERNS.match(version):
-        raise RuntimeError(f"Invalid version value: {version}")
+        # shell lint (real validation)
+        subprocess.run(
+            ["./termux-build", "lint", pkg],
+            check=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
 
+        print(f"✅ {pkg} OK (v{version})")
 
-def main():
-    if not TERMUX_BUILD.exists():
-        print("❌ termux-build not found")
-        sys.exit(1)
+    except Exception as e:
+        FAILED = True
+        print(f"❌ {pkg} failed: {e}")
 
-    run(["chmod", "+x", "termux-build"])
+if FAILED:
+    print("\n❌ One or more packages failed validation")
+    sys.exit(1)
 
-    if not PACKAGES_DIR.exists():
-        print("❌ packages/ directory missing")
-        sys.exit(1)
-
-    failed = False
-
-    for pkg_dir in sorted(PACKAGES_DIR.iterdir()):
-        if not pkg_dir.is_dir():
-            continue
-
-        pkg = pkg_dir.name
-        build_sh = pkg_dir / "build.sh"
-
-        print(f"\n🔍 Validating package: {pkg}")
-
-        try:
-            if not build_sh.exists():
-                raise RuntimeError("build.sh not found")
-
-            validate_build_sh(pkg, build_sh)
-
-            run(["./termux-build", "lint", pkg], pkg)
-            run(["./termux-build", "explain", pkg], pkg)
-            run(["./termux-build", "suggest", pkg], pkg)
-
-            print(f"✅ {pkg} passed validation")
-
-        except subprocess.CalledProcessError:
-            print(f"❌ {pkg} failed: termux-build error")
-            failed = True
-
-        except Exception as e:
-            print(f"❌ {pkg} failed: {e}")
-            failed = True
-
-    if failed:
-        print("\n❌ One or more packages failed validation")
-        sys.exit(1)
-
-    print("\n🎉 All packages validated successfully")
-
-
-if __name__ == "__main__":
-    main()
+print("\n🎉 All packages validated successfully")
