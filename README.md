@@ -36,6 +36,19 @@ This project follows community-driven standards including:
 
 ---
 
+## 📱Tools Interface / Screenshots
+Feature:
+> User friendly and
+> Touchscreen Support
+
+![Main Interface](.assets/0main.jpg)
+
+![Install Interface](.assets/1install.jpg)
+
+![Menu Pallete Interface](.assets/2pallete.jpg)
+
+---
+
 ## ✨ Fitur Utama
 
 - 📦 **Package Browser (TUI)**  
