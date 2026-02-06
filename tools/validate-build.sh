@@ -13,7 +13,10 @@ if [[ ! -f "$FILE" ]]; then
     exit 2
 fi
 
-echo "🔎 Validating build.sh → $FILE"
+# Ambil nama package dari path, misal: packages/tdoc/build.sh → tdoc
+PACKAGE_NAME="$(basename "$(dirname "$FILE")")"
+
+echo "🔎 Validating build.sh → 📦$PACKAGE_NAME"
 echo "================================================="
 
 FAIL=0
@@ -52,13 +55,14 @@ if grep -q "apt install" "$FILE"; then
     echo "⚠️  WARN : apt install found (use pkg install instead)"
 fi
 
-# ---------- REAL SHA256 CHECK ----------
-SRCURL=$(grep "^TERMUX_PKG_SRCURL=" "$FILE" | cut -d= -f2- | tr -d '"')
-EXPECTED_SHA=$(grep "^TERMUX_PKG_SHA256=" "$FILE" | cut -d= -f2- | tr -d '"')
+# ---------- SOURCE SHA256 CHECK ----------
+source "$FILE"
+eval "SRCURL=\"$TERMUX_PKG_SRCURL\""
+EXPECTED_SHA="${TERMUX_PKG_SHA256:-}"
 
 if [[ -n "$SRCURL" && -n "$EXPECTED_SHA" ]]; then
     echo
-    echo "🔎 Verifying SHA256 of source..."
+    echo "🔎 Verifying SHA256 of source package 📦 $PACKAGE_NAME..."
     TMPFILE=$(mktemp)
     if ! curl -sL "$SRCURL" -o "$TMPFILE"; then
         echo "❌ Failed to download source from $SRCURL"
