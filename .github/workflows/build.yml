@@ -23,14 +23,15 @@ jobs:
           chmod +x termux-build
           chmod +x tools/termux-build-create.sh
           chmod +x tools/validate-build.sh
-
+          
       - name: Lint packages
         run: |
           set -e
           for pkg in packages/*; do
             [[ -d "$pkg" ]] || continue
-            echo "🔍 Linting $(basename "$pkg")"
-            ./termux-build lint "$pkg"
+            NAME="$(basename "$pkg")"
+            echo "🔍 Linting $NAME"
+            ./termux-build lint "$NAME"
           done
 
       - name: Check PR
