@@ -26,11 +26,17 @@ jobs:
 
       - name: Lint packages
         run: |
-          ./termux-build lint packages/
+          set -e
+          for pkg in packages/*; do
+            [[ -d "$pkg" ]] || continue
+            echo "🔍 Linting $(basename "$pkg")"
+            ./termux-build lint "$pkg"
+          done
 
       - name: Check PR
         if: github.event_name == 'pull_request'
         run: |
+          set -e
           for pkg in packages/*; do
             [[ -d "$pkg" ]] || continue
             ./termux-build check-pr "$(basename "$pkg")"
