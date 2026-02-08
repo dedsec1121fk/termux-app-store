@@ -30,19 +30,16 @@ for pkg in sorted(os.listdir(PACKAGES_DIR)):
     print(f"\n🔍 Validating package: {pkg}")
 
     try:
-        # version wajib
         version = parse_var(build_sh, "TERMUX_PKG_VERSION")
         if not version:
             raise ValueError("Missing TERMUX_PKG_VERSION")
 
-        # pkg name opsional
         declared_name = parse_var(build_sh, "TERMUX_PKG_NAME")
         if declared_name and declared_name != pkg:
             raise ValueError(
                 f"TERMUX_PKG_NAME mismatch (expected '{pkg}', got '{declared_name}')"
             )
 
-        # shell lint (real validation)
         subprocess.run(
             ["./termux-build", "lint", pkg],
             check=True,
