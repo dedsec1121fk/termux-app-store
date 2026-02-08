@@ -12,7 +12,7 @@ on:
 jobs:
   lint-and-pr-check:
     runs-on: ubuntu-latest
-    if: github.actor == 'renovate[bot]'  # Hanya PR dari Renovate Bot
+    if: github.actor == 'renovate[bot]'
 
     steps:
       - name: Checkout repository
