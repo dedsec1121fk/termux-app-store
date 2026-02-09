@@ -10,7 +10,7 @@ jobs:
     if: "!contains(github.event.head_commit.message, '[ci skip]')"
 
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
@@ -24,7 +24,7 @@ jobs:
 
           # create changelog if it doesn't exist
           if [[ ! -f "$CHANGELOG" ]]; then
-            cat <<EOF > "$CHANGELOG"
+cat <<EOF > "$CHANGELOG"
 # Changelog
 
 ## [Unreleased]
@@ -34,7 +34,7 @@ jobs:
 EOF
           fi
 
-          # detect changed build.sh
+          # detect changed build.sh files
           git diff --name-only HEAD~1 HEAD \
             | grep '^packages/.*/build.sh' > /tmp/changed || true
 
@@ -42,23 +42,24 @@ EOF
 
           while read -r build; do
             pkg=$(basename "$(dirname "$build")")
-            ver=$(grep '^TERMUX_PKG_VERSION=' "$build" | head -n1 | cut -d= -f2)
+            ver=$(grep '^TERMUX_PKG_VERSION=' "$build" | cut -d= -f2)
 
-            # decide section: Added or Updated
+            # decide section
             if grep -q "Package \`${pkg}\`" "$CHANGELOG"; then
               section="Updated"
             else
               section="Added"
             fi
 
-            # append only if version entry doesn't exist
+            # avoid duplicates
             if ! awk '/## \[Unreleased\]/,/^## \[/' "$CHANGELOG" \
               | grep -q "\`${pkg}\` v${ver}"; then
+
               sed -i "/### ${section}/a - Package \`${pkg}\` v${ver}" "$CHANGELOG"
             fi
           done < /tmp/changed
 
-      - name: Commit & push
+      - name: Commit & push changelog
         run: |
           git config user.name "Termux App Store"
           git config user.email "258516621+termux-app-store@users.noreply.github.com"
