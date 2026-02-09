@@ -1,6 +1,10 @@
 name: PR Package Checker & Reported
 
 on:
+  pull_request:
+    types:
+      - labeled
+      - unlabeled
   workflow_run:
     workflows: ["Lint PR Checker & Helper"]
     types:
@@ -8,7 +12,7 @@ on:
 
 jobs:
   review-packages:
-    if: contains(github.event.workflow_run.pull_requests[0].labels.*.name, 'review-approved')
+    if: contains(github.event.pull_request.labels.*.name, 'review-approved') || contains(github.event.workflow_run.pull_requests[0].labels.*.name, 'review-approved')
     runs-on: ubuntu-latest
     name: PR Package Build & Check
 
@@ -17,6 +21,7 @@ jobs:
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha || github.event.workflow_run.head_commit.sha }}
 
       - name: Setup system dependencies
         run: |
@@ -32,7 +37,12 @@ jobs:
         id: packages
         shell: bash
         run: |
-          PKGS=$(git diff origin/master...HEAD --name-only \
+          if [[ -n "${{ github.event.pull_request.base.sha }}" ]]; then
+            BASE_SHA="${{ github.event.pull_request.base.sha }}"
+          else
+            BASE_SHA="origin/master"
+          fi
+          PKGS=$(git diff "$BASE_SHA"...HEAD --name-only \
             | awk -F/ '/^packages\//{print $2}' \
             | sort -u)
           echo "changed=${PKGS:-}" >> "$GITHUB_OUTPUT"
