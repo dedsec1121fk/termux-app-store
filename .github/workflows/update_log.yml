@@ -16,20 +16,25 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.TERMUXAPPSTORE }}
 
-      - name: Detect package changes
+      - name: Detect package changes and update changelog
         run: |
           set -e
 
           CHANGELOG="CHANGELOG.md"
-          [[ -f "$CHANGELOG" ]] || cat <<EOF > "$CHANGELOG"
-          # Changelog
 
-          ## [Unreleased]
-          ### Added
-          ### Updated
-          ### Fixed
-          EOF
+          # create changelog if it doesn't exist
+          if [[ ! -f "$CHANGELOG" ]]; then
+            cat <<EOF > "$CHANGELOG"
+# Changelog
 
+## [Unreleased]
+### Added
+### Updated
+### Fixed
+EOF
+          fi
+
+          # detect changed build.sh
           git diff --name-only HEAD~1 HEAD \
             | grep '^packages/.*/build.sh' > /tmp/changed || true
 
@@ -37,17 +42,18 @@ jobs:
 
           while read -r build; do
             pkg=$(basename "$(dirname "$build")")
-            ver=$(grep '^TERMUX_PKG_VERSION=' "$build" | cut -d= -f2 | tr -d '"')
+            ver=$(grep '^TERMUX_PKG_VERSION=' "$build" | head -n1 | cut -d= -f2)
 
+            # decide section: Added or Updated
             if grep -q "Package \`${pkg}\`" "$CHANGELOG"; then
               section="Updated"
             else
               section="Added"
             fi
 
+            # append only if version entry doesn't exist
             if ! awk '/## \[Unreleased\]/,/^## \[/' "$CHANGELOG" \
               | grep -q "\`${pkg}\` v${ver}"; then
-
               sed -i "/### ${section}/a - Package \`${pkg}\` v${ver}" "$CHANGELOG"
             fi
           done < /tmp/changed
