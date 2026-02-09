@@ -18,13 +18,15 @@ jobs:
           token: ${{ secrets.TERMUXAPPSTORE }}
 
       - name: Detect package changes and update changelog
+        shell: bash
         run: |
           set -e
 
           CHANGELOG="CHANGELOG.md"
 
+          # Create changelog if missing
           if [[ ! -f "$CHANGELOG" ]]; then
-cat <<EOF > "$CHANGELOG"
+            cat <<'EOF' > "$CHANGELOG"
 # Changelog
 
 ## [Unreleased]
@@ -34,6 +36,7 @@ cat <<EOF > "$CHANGELOG"
 EOF
           fi
 
+          # Detect changed build.sh files
           git diff --name-only "${{ github.event.before }}" "${{ github.sha }}" \
             | grep '^packages/.*/build.sh' > /tmp/changed || true
 
@@ -43,20 +46,29 @@ EOF
             pkg="$(basename "$(dirname "$build")")"
             ver="$(grep '^TERMUX_PKG_VERSION=' "$build" | cut -d= -f2)"
 
+            # Check if package already exists in changelog
             if grep -q "Package \`${pkg}\`" "$CHANGELOG"; then
+              old_ver="$(grep "Package \`${pkg}\` v" "$CHANGELOG" \
+                | sed -E 's/.*v([^ ]+).*/\1/' \
+                | tail -n1)"
+
+              # Same version → skip
+              [[ "$old_ver" == "$ver" ]] && continue
+
               section="Updated"
             else
               section="Added"
             fi
 
+            # Avoid duplicates inside Unreleased
             if ! awk '/## \[Unreleased\]/,/^## \[/' "$CHANGELOG" \
               | grep -q "\`${pkg}\` v${ver}"; then
-
               sed -i "/### ${section}/a - Package \`${pkg}\` v${ver}" "$CHANGELOG"
             fi
           done < /tmp/changed
 
       - name: Commit & push changelog
+        shell: bash
         run: |
           git config user.name "Termux App Store"
           git config user.email "258516621+termux-app-store@users.noreply.github.com"
