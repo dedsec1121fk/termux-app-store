@@ -14,6 +14,7 @@
 
 This project follows community-driven standards including:
 - Public contribution workflows
+- TUI and CLI interface 
 - Automated CI/CD pipelines
 - Issue & pull request templates
 Transparent release and changelog process
@@ -35,7 +36,7 @@ Transparent release and changelog process
 
 > 🧠 **Offline-first • Source-based • Binary-safe • Termux-native**
 
-**Termux App Store** adalah **TUI (Terminal User Interface)** berbasis **Textual (Python)** yang memungkinkan pengguna Termux untuk **menelusuri, membangun, dan mengelola aplikasi** dari skrip build secara lokal — tanpa akun, tanpa telemetry, dan tanpa ketergantungan cloud.
+**Termux App Store** adalah **TUI (Terminal User Interface)** berbasis **Textual (Python)** dan CLI yang memungkinkan pengguna Termux untuk **menelusuri, membangun, dan mengelola aplikasi** dari skrip build secara lokal — tanpa akun, tanpa telemetry, dan tanpa ketergantungan cloud.
 
 > ℹ️ **Catatan penting**
 > Termux App Store **bukan repository biner terpusat** dan **bukan installer otomatis tersembunyi**.  
@@ -86,6 +87,24 @@ Feature:
   
 ---
 
+## 🖥️ Perintah Termux App Store
+
+### TUI Commands:
+- `termux-app-store` # Menjalankan TUI Interface
+
+### CLI Commands:
+- `termux-app-store` _# Menjalankan TUI_
+- `termux-app-store` `list` _# Daftar semua package_
+- `termux-app-store` `show` `<package>` _# Lihat detail package_
+- `termux-app-store` `install` `<package>` _# Build/install package_
+- `termux-app-store` `update` _# Update index package_
+- `termux-app-store` `upgrade` _# Upgrade semua package_
+- `termux-app-store` `upgrade` `<package>` _# Upgrade package tertentu_
+- `termux-app-store` `version` _# Cek versi termux app store terbaru_
+- `termux-app-store` `help` _# Bantuan / daftar command_
+
+---
+
 ## ✨ Fitur Utama
 
 - 📦 **Package Browser (TUI)**  
@@ -100,6 +119,12 @@ Feature:
 
 - ⚙️ **One-Click Build**
   Install / update paket via `build-package.sh`
+
+- ⚙️ **One-Click Checker Validation**
+  Cek validasi package yang ingin di distribusikan via `./termux-build`
+
+- ⚙️ **One-Click Install / Update / Uninstall Termux App Store**
+  Install / update / Uninstall file termux-app-store via `./tasctl`
 
 - 🧩 **Portable Execution**
   Dapat dijalankan dari direktori mana pun selama folder `termux-app-store/packages` tersedia
@@ -131,12 +156,17 @@ Lalu jalankan:
 ```
 termux-app-store
 ```
+Atau:
+```
+termux-app-store -h
+```
+
 ---
 
 ## 🧠 Cara Kerja
 1. Aplikasi mencari folder `termux-app-store/packages`
 2. Membaca metadata dari `build.sh`
-3. Menampilkan paket di UI
+3. Menampilkan paket Termux App Store di TUI atau CLI
 4. Menjalankan build via `build-package.sh`
 5. Menampilkan log & progress real-time
 
@@ -164,7 +194,7 @@ atau bisa ketik di command `./termux-build template`
 ---
 
 ## 🛠️ termux-build (Check-only Tool)
-termux-build adalah tool validasi & reviewer helper, BUKAN tool upload atau publish.
+**termux-build** adalah tool validasi & reviewer helper, BUKAN tool upload atau publish.
 Contoh perintah:
 - `./termux-build lint <packages/nama_package>`
 atau `./termux-build lint <package>`
@@ -174,6 +204,7 @@ atau `./termux-build lint <package>`
 - `./termux-build explain <package>`
 - `./termux-build template`
 - `./termux-build guide`
+
 ### Prinsip utama:
 - ❌ Tidak mengubah file
 - ❌ Tidak build otomatis
@@ -184,6 +215,7 @@ atau `./termux-build lint <package>`
   - Reviewer
   - Maintainer
   - CI check
+  - User distribution package
 
 ---
 
@@ -228,6 +260,7 @@ Kontribusi sangat diterima!
 - Perbaiki build script
 - Audit security
 - Perbaiki dokumentasi
+- Review PR (Pull Request)
 Panduan: [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ---
@@ -251,9 +284,10 @@ Lihat file [LICENSE](LICENSE)
 > “Local first. Control over convenience. Transparency over magic.”
 Termux App Store dibuat untuk pengguna yang ingin:
 - Memahami apa yang dijalankan
-- Mengontrol build
+- Mengontrol build dan source
 - Menghindari vendor lock-in
-- Mengupload tool ke public
+- Mengupload tool buatannya ke termux-app-store supaya bisa dipakai oleh public
+- Mendownload tool termux yang telah didistribusikan ke termux-app-store
 
 ---
 
@@ -262,7 +296,7 @@ Upload tool ke Termux App Store dibuat untuk:
 - Tool diunduh banyak orang
 - Keuntungan bagi yang punya tool di Termux App Store:
   - Update tool hanya mengubah (*version dan sha256*) di file build.sh
-- **Cara upload tool**:
+- **Cara upload tool ke Termux App Store**:
   - klik dan baca [HOW_TO_UPLOAD](HOW_TO_UPLOAD.md)
 
 ---
@@ -277,6 +311,7 @@ Independent Developer and Official Developer:
 ## ⭐ Dukungan
 Jika proyek ini berguna dan membantu:
 - ⭐ Star repo
+- 🧩 Bagikan ke publik
 - 🐛 Laporkan issue
 - 🔀 Kirim PR (Pull Request)
 
