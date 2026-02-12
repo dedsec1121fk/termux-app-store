@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT="$(cd "$(dirname "$0")" && pwd)"
 COMMAND="${1:-}"
 BASE_DIR="$ROOT/tools"
 source "$BASE_DIR/colors.sh"
