@@ -21,17 +21,20 @@ jobs:
     name: Lint and validate build.sh files
 
     steps:
-      - name: Checkout base repository
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-          ref: ${{ github.event.pull_request.base.ref }}
-
-      - name: Fetch PR changes
-        shell: bash
+      - name: Debug - Show PR info
         run: |
-          git fetch origin pull/${{ github.event.pull_request.number }}/head:pr
-          git checkout pr
+          echo "Event: ${{ github.event_name }}"
+          echo "PR Number: ${{ github.event.pull_request.number }}"
+          echo "Base SHA: ${{ github.event.pull_request.base.sha }}"
+          echo "Head SHA: ${{ github.event.pull_request.head.sha }}"
+          echo "Head Ref: ${{ github.event.pull_request.head.ref }}"
+          echo "Base Ref: ${{ github.event.pull_request.base.ref }}"
+
+      - name: Checkout PR head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
 
       - name: Find changed build.sh files
         id: files
@@ -39,6 +42,10 @@ jobs:
         run: |
           BASE_SHA="${{ github.event.pull_request.base.sha }}"
           HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+          
+          echo "Comparing: $BASE_SHA...$HEAD_SHA"
+          
+          # Get changed files
           FILES=$(git diff --name-only "$BASE_SHA" "$HEAD_SHA" | grep 'packages/.*/build.sh' || true)
 
           {
@@ -49,6 +56,20 @@ jobs:
 
           echo "Changed files:"
           echo "$FILES"
+          echo ""
+          
+          # Verify files exist
+          if [ -n "$FILES" ]; then
+            echo "Verifying file existence:"
+            while read -r file; do
+              [ -z "$file" ] && continue
+              if [ -f "$file" ]; then
+                echo "  ✅ $file exists"
+              else
+                echo "  ❌ $file NOT FOUND"
+              fi
+            done <<< "$FILES"
+          fi
 
       - name: Lint build.sh (bash syntax check)
         id: lint
@@ -59,7 +80,18 @@ jobs:
 
           while read -r file; do
             [ -z "$file" ] && continue
+            
             echo "🧹 Checking syntax: $file"
+            
+            # Check if file exists
+            if [ ! -f "$file" ]; then
+              echo "❌ File not found: $file"
+              ERROR=1
+              LINT_DETAILS="${LINT_DETAILS}### ❌ File Not Found: \`$file\`\n\n"
+              LINT_DETAILS="${LINT_DETAILS}This file appears in git diff but doesn't exist in the working directory.\n"
+              LINT_DETAILS="${LINT_DETAILS}This may indicate the file was deleted or the checkout failed.\n\n"
+              continue
+            fi
             
             # Normalize line endings
             sed -i 's/\r$//' "$file"
@@ -94,6 +126,17 @@ jobs:
             [ -z "$file" ] && continue
 
             echo "🔍 Validating content: $file"
+            
+            # Check if file exists
+            if [ ! -f "$file" ]; then
+              echo "❌ File not found: $file (skipping validation)"
+              VALIDATION_ERROR=1
+              VALIDATION_DETAILS="${VALIDATION_DETAILS}## 📦 File: \`$file\`\n\n"
+              VALIDATION_DETAILS="${VALIDATION_DETAILS}- ❌ **File not found in working directory**\n\n"
+              VALIDATION_DETAILS="${VALIDATION_DETAILS}---\n\n"
+              continue
+            fi
+            
             PKG_NAME=$(basename $(dirname "$file"))
 
             # Extract variables safely
