@@ -13,9 +13,21 @@ else
   RESET="\033[0m"
 fi
 
-echo -e "${BOLD_CYAN}# build.sh template (Termux package)${RESET}"
+echo -e "${BOLD_GREEN}This is ${BOLD_YELLOW}build.sh ${BOLD_GREEN}template (Termux package)${BOLD_YELLOW}"
 echo
-
+cat <<EOF
+TERMUX_PKG_HOMEPAGE=
+TERMUX_PKG_DESCRIPTION=""
+TERMUX_PKG_LICENSE=""
+TERMUX_PKG_MAINTAINER=""
+TERMUX_PKG_VERSION=
+TERMUX_PKG_SRCURL=""
+TERMUX_PKG_SHA256=
+TERMUX_PKG_DEPENDS="" (Optional)
+EOF
+echo
+echo -e "${BOLD_GREEN}===== [ ${BOLD_YELLOW}EXAMPLE ${BOLD_GREEN}] =====${RESET}"
+echo
 echo -e "${BOLD_YELLOW}TERMUX_PKG_HOMEPAGE${RESET}=https://example.com"
 echo -e "${BOLD_YELLOW}TERMUX_PKG_DESCRIPTION${RESET}=\"Short description of the tool\""
 echo -e "${BOLD_YELLOW}TERMUX_PKG_LICENSE${RESET}=\"MIT\""
