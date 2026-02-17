@@ -1,0 +1,199 @@
+{
+  "version": "1.0",
+  "repository": "https://github.com/djunekz/termux-app-store",
+  "generated_at": "2026-02-17T08:11:00.463480+00:00",
+  "total": 12,
+  "packages": [
+    {
+      "package": "baxter",
+      "version": "1.2.4",
+      "maintainer": "@djunekz",
+      "description": "Encrypt and decrypt files termux",
+      "homepage": "https://github.com/djunekz/baxter",
+      "license": "Apache-2.0",
+      "download_size": "Unknown",
+      "installed_size": "Unknown",
+      "source": "https://github.com/djunekz/termux-app-store",
+      "srcurl": "https://github.com/djunekz/baxter/releases/download/v${TERMUX_PKG_VERSION}/baxter-v${TERMUX_PKG_VERSION}.tar.gz",
+      "sha256": "7fac8356d81197218f44e60e0212e12ad63ca55462f9a563b541a589319e3227",
+      "platform_independent": false,
+      "depends": [
+        "nodejs"
+      ]
+    },
+    {
+      "package": "encrypt",
+      "version": "1.1",
+      "maintainer": "@djunekz",
+      "description": "ELF binary for file python/python3 with build deb package",
+      "homepage": "https://github.com/djunekz/encrypt",
+      "license": "MIT",
+      "download_size": "Unknown",
+      "installed_size": "Unknown",
+      "source": "https://github.com/djunekz/termux-app-store",
+      "srcurl": "https://github.com/djunekz/encrypt/archive/refs/tags/${TERMUX_PKG_VERSION}.zip",
+      "sha256": "07d954452ed93a1aec029e727da275004bdb67940743a41b357f333b7cc36d5a",
+      "platform_independent": false
+    },
+    {
+      "package": "ghostrack",
+      "version": "1.0.0",
+      "maintainer": "@termux-app-store",
+      "description": "Useful tool to track location or mobile number",
+      "homepage": "https://github.com/HunxByts/GhostTrack",
+      "license": "MIT",
+      "download_size": "Unknown",
+      "installed_size": "Unknown",
+      "source": "https://github.com/djunekz/termux-app-store",
+      "srcurl": "https://github.com/droidv1/termool/releases/download/v${TERMUX_PKG_VERSION}/ghostrack.tar.gz",
+      "sha256": "43c5fe4734ef358fe17659a08b5846682d43f046e880233503f7412ebbdf1238",
+      "platform_independent": false
+    },
+    {
+      "package": "impulse",
+      "version": "1.0.0",
+      "maintainer": "@termux-app-store",
+      "description": "Denial-of-Service ToolKit with multiple attack methods",
+      "homepage": "https://github.com/LimerBoy/Impulse",
+      "license": "MIT",
+      "download_size": "Unknown",
+      "installed_size": "Unknown",
+      "source": "https://github.com/djunekz/termux-app-store",
+      "srcurl": "https://github.com/droidv1/termool/releases/download/v${TERMUX_PKG_VERSION}/impulse.tar.gz",
+      "sha256": "d03e1a4c74a09b63900ffd1bc889bbc8f5720b83914b1a2fdd5453fb23a63c18",
+      "platform_independent": false
+    },
+    {
+      "package": "iptrack",
+      "version": "1.0.0",
+      "maintainer": "@termux-app-store",
+      "description": "Track IP Location With Live Address And Accuracy",
+      "homepage": "https://github.com/droidv1/termool",
+      "license": "MIT",
+      "download_size": "Unknown",
+      "installed_size": "Unknown",
+      "source": "https://github.com/djunekz/termux-app-store",
+      "srcurl": "https://github.com/droidv1/termool/releases/download/v${TERMUX_PKG_VERSION}/iptrack.tar.gz",
+      "sha256": "7bbaf211e73e7e9c86eee7138abfaf9ccb9b9ed3f84f3933cb3f60db0e10156b",
+      "platform_independent": false
+    },
+    {
+      "package": "pmcli",
+      "version": "0.1.0",
+      "maintainer": "Djunekz <gab288.gab288@passinbox.com>",
+      "description": "Terminal-based project manager CLI",
+      "homepage": "https://github.com/djunekz/pmcli",
+      "license": "MIT",
+      "download_size": "Unknown",
+      "installed_size": "Unknown",
+      "source": "https://github.com/djunekz/termux-app-store",
+      "srcurl": "https://github.com/djunekz/pmcli/archive/refs/tags/v${TERMUX_PKG_VERSION}.tar.gz",
+      "sha256": "b2e24af39111a75eacfdd195950423108c6c01b5caeed923a904b835a572dc53",
+      "platform_independent": false,
+      "depends": [
+        "rust",
+        "openssl",
+        "zlib"
+      ]
+    },
+    {
+      "package": "pymaker",
+      "version": "1.0.0",
+      "maintainer": "@droidv1",
+      "description": "Simple tool for create python script",
+      "homepage": "https://github.com/droidv1/pymaker",
+      "license": "MIT",
+      "download_size": "Unknown",
+      "installed_size": "Unknown",
+      "source": "https://github.com/djunekz/termux-app-store",
+      "srcurl": "https://github.com/droidv1/pymaker/releases/download/${TERMUX_PKG_VERSION}/pymaker-${TERMUX_PKG_VERSION}.tar.gz",
+      "sha256": "2fe03f6839e7b550f888d477628b852d648ea4ed688643122d3c182d495564e4",
+      "platform_independent": false
+    },
+    {
+      "package": "tdoc",
+      "version": "1.0.5",
+      "maintainer": "@djunekz",
+      "description": "TDOC - Diagnostic and repair utility for Termux environment",
+      "homepage": "https://github.com/djunekz/tdoc",
+      "license": "MIT",
+      "download_size": "Unknown",
+      "installed_size": "Unknown",
+      "source": "https://github.com/djunekz/termux-app-store",
+      "srcurl": "https://github.com/djunekz/tdoc/archive/refs/tags/v${TERMUX_PKG_VERSION}.tar.gz",
+      "sha256": "81ebc15bfefe7ab78f31fd919b2d2432ca83208b341ca77935daf3b051091990",
+      "platform_independent": true,
+      "depends": [
+        "bash",
+        "coreutils",
+        "curl",
+        "git",
+        "gnupg",
+        "termux-tools"
+      ]
+    },
+    {
+      "package": "termstyle",
+      "version": "1.0.0",
+      "maintainer": "@djunekz",
+      "description": "Simple tool for change color, command prompt, and cursor termux",
+      "homepage": "https://gtihub.com/djunekz/termstyle",
+      "license": "GPL-3.0",
+      "download_size": "Unknown",
+      "installed_size": "Unknown",
+      "source": "https://github.com/djunekz/termux-app-store",
+      "srcurl": "https://github.com/djunekz/termstyle/releases/download/${TERMUX_PKG_VERSION}/termstyle_${TERMUX_PKG_VERSION}_all.deb",
+      "sha256": "955a9de10d5896801e44191385ec4ee24881d5e57777b2f6c60fb4f627a3e3fd",
+      "platform_independent": false
+    },
+    {
+      "package": "webshake",
+      "version": "1.0.2",
+      "maintainer": "Djunekz",
+      "description": "Scan vulnerabilities and analyze websites",
+      "homepage": "https://github.com/djunekz/webshake",
+      "license": "Custom",
+      "download_size": "Unknown",
+      "installed_size": "Unknown",
+      "source": "https://github.com/djunekz/termux-app-store",
+      "srcurl": "https://github.com/djunekz/webshake/releases/download/v${TERMUX_PKG_VERSION}/webshake-${TERMUX_PKG_VERSION}.tar.gz",
+      "sha256": "4312838c7d201f1540923dfbeeeb21d8af4ae9896a2ce18357208805a859cbe8",
+      "platform_independent": false
+    },
+    {
+      "package": "zora",
+      "version": "1.0.0",
+      "maintainer": "@termux-app-store",
+      "description": "The ultimate OSINT framework",
+      "homepage": "https://github/djunekz/termux-app-store",
+      "license": "MIT",
+      "download_size": "Unknown",
+      "installed_size": "Unknown",
+      "source": "https://github.com/djunekz/termux-app-store",
+      "srcurl": "https://github.com/droidv1/termool/releases/download/v${TERMUX_PKG_VERSION}/zora",
+      "sha256": "0bd6db4c38fbe1699b5c6890c0f50f1c13c171303b6d52725b6b821284bbddc2",
+      "platform_independent": false,
+      "depends": [
+        "python"
+      ]
+    },
+    {
+      "package": "zoracrypter",
+      "version": "1.0.0",
+      "maintainer": "@termux-app-store",
+      "description": "Encrypter Stealth Binary Builder",
+      "homepage": "https://github.com/djunekz/termux-app-store",
+      "license": "MIT",
+      "download_size": "Unknown",
+      "installed_size": "Unknown",
+      "source": "https://github.com/djunekz/termux-app-store",
+      "srcurl": "https://github.com/droidv1/termool/releases/download/v${TERMUX_PKG_VERSION}/zoracrypter",
+      "sha256": "25b11a1d8fd6b0ef075df5e1d31d5e061e8e6de9e2afdb0c29f11590ab203e1d",
+      "platform_independent": false,
+      "depends": [
+        "clang",
+        "python"
+      ]
+    }
+  ]
+}
