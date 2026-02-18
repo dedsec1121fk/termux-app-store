@@ -70,7 +70,7 @@
 ## 🚀 Instalasi Cepat
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/djunekz/termux-app-store/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/djunekz/termux-app-store/master/install.sh | bash
 ```
 
 Setelah instalasi, jalankan:
