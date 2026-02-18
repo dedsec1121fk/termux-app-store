@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src=".assets/0.jpeg" width="420" alt="Termux App Store — TUI Package Manager for Termux"/>
+<img src=".assets/00.jpeg" width="420" alt="Termux App Store — TUI Package Manager for Termux"/>
 
 <br/>
 
