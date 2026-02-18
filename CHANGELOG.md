@@ -11,6 +11,32 @@ and this project adheres to semantic versioning.
 
 ---
 
+## [v0.1.6] - 2026-02-18
+### Added
+- index.json for based
+- update_index workflows
+- package_manager for index
+- build for index
+
+### Update
+- `termux-app-store` new interface (CLI)
+- `termux-app-store` feature index based
+- System `update` and `upgrade`
+- Installer interface
+- Uninstaller interface
+- Auto CLI workflows for PR (Pull Request)
+- Colors `termux-build`
+- Auto install / update / uninstall with `tasctl`
+
+### Fixed
+- Fixed build-package for installing package
+- Fixed renovate workflows
+- Fixed update log workflows
+- Fixed PR Checker workflows
+- Fixed Lint Cheker workflows
+
+---
+
 ## [v0.1.4] - 2026-02-13
 ### Added
 - Package `impulse` v1.0.0
