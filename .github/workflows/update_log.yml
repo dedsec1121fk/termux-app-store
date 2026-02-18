@@ -7,6 +7,8 @@ on:
     paths:
       - 'packages/*/build.sh'
 
+  workflow_dispatch: 
+  
 permissions:
   contents: write
   pull-requests: read
@@ -19,7 +21,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -28,185 +30,200 @@ jobs:
 
       - name: Configure Git
         run: |
-          #git config user.name "github-actions[bot]"
-          # git config user.email "github-actions[bot]@users.noreply.github.com"
           git config user.name "Termux App Store"
           git config user.email "258516621+termux-app-store@users.noreply.github.com"
+
       - name: Detect changed packages
         id: detect
         shell: bash
         run: |
           set -e
-          
+
           BEFORE="${{ github.event.before }}"
           AFTER="${{ github.event.after }}"
-          
+
           echo "=== Package Change Detection ==="
           echo "Branch: ${{ github.ref_name }}"
           echo "Range: $BEFORE...$AFTER"
           echo ""
-          
-          # Get changed build.sh files
+
           CHANGED=$(git diff --name-only "$BEFORE" "$AFTER" | grep 'packages/.*/build.sh' || true)
-          
+
           if [ -z "$CHANGED" ]; then
             echo "No package changes detected"
             echo "has_changes=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          
+
           echo "Changed packages:"
           echo "$CHANGED"
           echo ""
-          
-          # Process changes
-          ADDED=""
-          UPDATED=""
-          CHANGED_META=""
-          
+
+          ADDED_FILE=$(mktemp)
+          UPDATED_FILE=$(mktemp)
+          META_FILE=$(mktemp)
+
           while IFS= read -r file; do
             [ -z "$file" ] && continue
-            
+
             pkg=$(basename "$(dirname "$file")")
             echo "→ Processing: $pkg"
-            
-            # Check if new package
+
+            ver=$(grep '^TERMUX_PKG_VERSION=' "$file" | head -1 | sed 's/^TERMUX_PKG_VERSION=//;s/["\x27]//g')
+            desc=$(grep '^TERMUX_PKG_DESCRIPTION=' "$file" | head -1 | sed 's/^TERMUX_PKG_DESCRIPTION=//;s/["\x27]//g')
+
             if ! git cat-file -e "$BEFORE:$file" 2>/dev/null; then
-              ver=$(grep '^TERMUX_PKG_VERSION=' "$file" | head -1 | cut -d'=' -f2 | tr -d '"'"'")
-              desc=$(grep '^TERMUX_PKG_DESCRIPTION=' "$file" | head -1 | cut -d'=' -f2- | tr -d '"'"'")
-              
               if [ -n "$desc" ]; then
-                ADDED="${ADDED}- Package \`${pkg}\` v${ver} - ${desc}"$'\n'
+                # Gunakan printf untuk hindari interpretasi backtick
+                printf -- '- Package `%s` v%s - %s\n' "$pkg" "$ver" "$desc" >> "$ADDED_FILE"
               else
-                ADDED="${ADDED}- Package \`${pkg}\` v${ver}"$'\n'
+                printf -- '- Package `%s` v%s\n' "$pkg" "$ver" >> "$ADDED_FILE"
               fi
               echo "  Status: NEW (v${ver})"
-              
+
             else
-              # Check version change
-              old_ver=$(git show "$BEFORE:$file" | grep '^TERMUX_PKG_VERSION=' | head -1 | cut -d'=' -f2 | tr -d '"'"'")
-              new_ver=$(grep '^TERMUX_PKG_VERSION=' "$file" | head -1 | cut -d'=' -f2 | tr -d '"'"'")
-              
+
+              old_ver=$(git show "$BEFORE:$file" | grep '^TERMUX_PKG_VERSION=' | head -1 | sed 's/^TERMUX_PKG_VERSION=//;s/["\x27]//g')
+              new_ver="$ver"
+
               if [ "$old_ver" != "$new_ver" ]; then
-                UPDATED="${UPDATED}- Package \`${pkg}\` v${old_ver} → v${new_ver}"$'\n'
+                printf -- '- Package `%s` v%s → v%s\n' "$pkg" "$old_ver" "$new_ver" >> "$UPDATED_FILE"
                 echo "  Status: UPDATED ($old_ver → $new_ver)"
               else
-                # Check metadata
+
                 if git diff "$BEFORE" "$AFTER" -- "$file" | grep -qE '^[+-]TERMUX_PKG_(SRCURL|SHA256|DEPENDS)='; then
-                  CHANGED_META="${CHANGED_META}- Package \`${pkg}\` v${new_ver} - Updated metadata"$'\n'
+                  printf -- '- Package `%s` v%s - Updated metadata\n' "$pkg" "$new_ver" >> "$META_FILE"
                   echo "  Status: METADATA CHANGED (v${new_ver})"
                 fi
               fi
             fi
           done <<< "$CHANGED"
-          
-          # Build changelog entries
-          ENTRIES=""
-          [ -n "$ADDED" ] && ENTRIES="${ENTRIES}### Added"$'\n'"$ADDED"$'\n'
-          [ -n "$UPDATED" ] && ENTRIES="${ENTRIES}### Update"$'\n'"$UPDATED"$'\n'
-          [ -n "$CHANGED_META" ] && ENTRIES="${ENTRIES}### Changed"$'\n'"$CHANGED_META"$'\n'
-          
-          if [ -z "$ENTRIES" ]; then
+
+          ENTRIES_FILE=$(mktemp)
+
+          if [ -s "$ADDED_FILE" ]; then
+            printf '### Added\n' >> "$ENTRIES_FILE"
+            cat "$ADDED_FILE" >> "$ENTRIES_FILE"
+            printf '\n' >> "$ENTRIES_FILE"
+          fi
+
+          if [ -s "$UPDATED_FILE" ]; then
+            printf '### Update\n' >> "$ENTRIES_FILE"
+            cat "$UPDATED_FILE" >> "$ENTRIES_FILE"
+            printf '\n' >> "$ENTRIES_FILE"
+          fi
+
+          if [ -s "$META_FILE" ]; then
+            printf '### Changed\n' >> "$ENTRIES_FILE"
+            cat "$META_FILE" >> "$ENTRIES_FILE"
+            printf '\n' >> "$ENTRIES_FILE"
+          fi
+
+          # Cleanup temp files
+          rm -f "$ADDED_FILE" "$UPDATED_FILE" "$META_FILE"
+
+          if [ ! -s "$ENTRIES_FILE" ]; then
             echo "No significant changes"
             echo "has_changes=false" >> "$GITHUB_OUTPUT"
+            rm -f "$ENTRIES_FILE"
             exit 0
           fi
-          
+
           echo ""
           echo "=== Generated Changelog Entries ==="
-          echo "$ENTRIES"
+          cat "$ENTRIES_FILE"
           echo "===================================="
-          
-          # Save output
-          {
-            echo "entries<<EOF"
-            echo "$ENTRIES"
-            echo "EOF"
-            echo "has_changes=true"
-          } >> "$GITHUB_OUTPUT"
+
+          echo "entries_file=$ENTRIES_FILE" >> "$GITHUB_OUTPUT"
+          echo "has_changes=true" >> "$GITHUB_OUTPUT"
 
       - name: Update CHANGELOG.md
         if: steps.detect.outputs.has_changes == 'true'
         shell: bash
         run: |
           set -e
-          
-          ENTRIES="${{ steps.detect.outputs.entries }}"
-          
+
+          ENTRIES_FILE="${{ steps.detect.outputs.entries_file }}"
+
           echo "=== Updating CHANGELOG.md ==="
-          
-          # Check file exists
+
           if [ ! -f "CHANGELOG.md" ]; then
             echo "ERROR: CHANGELOG.md not found"
             exit 1
           fi
-          
-          awk -v entries="$ENTRIES" '
+
+          if [ ! -f "$ENTRIES_FILE" ]; then
+            echo "ERROR: entries_file not found: $ENTRIES_FILE"
+            exit 1
+          fi
+
+          awk -v entries_file="$ENTRIES_FILE" '
             /^## \[Unreleased\]/ {
               print $0
-              print entries
+              while ((getline line < entries_file) > 0) {
+                print line
+              }
+              close(entries_file)
               print "---"
               next
             }
             /^---$/ && !printed {
-              printed=1
+              printed = 1
               next
             }
             { print }
           ' CHANGELOG.md > CHANGELOG.md.tmp
-          
-          # Verify temp file is not empty
+
           if [ ! -s CHANGELOG.md.tmp ]; then
             echo "ERROR: Failed to generate updated CHANGELOG"
             exit 1
           fi
-          
-          # Replace original
+
           mv CHANGELOG.md.tmp CHANGELOG.md
-          
+
           echo "✅ CHANGELOG.md updated"
           echo ""
           echo "Added entries:"
-          echo "$ENTRIES"
+          cat "$ENTRIES_FILE"
+
+          # Cleanup
+          rm -f "$ENTRIES_FILE"
 
       - name: Commit and push
         if: steps.detect.outputs.has_changes == 'true'
         shell: bash
         run: |
           set -e
-          
+
           git add CHANGELOG.md
-          
-          # Check if there are changes
+
           if git diff --staged --quiet; then
             echo "No changes to commit"
             exit 0
           fi
-          
-          # Commit
+
           git commit -m "docs: update CHANGELOG [skip ci]"
-          
-          # Push with retry
+
           echo "Pushing to ${{ github.ref_name }}..."
-          
+
           MAX_RETRIES=3
           RETRY=0
-          
+
           while [ $RETRY -lt $MAX_RETRIES ]; do
             if git push origin "${{ github.ref_name }}"; then
               echo "✅ Push successful"
               exit 0
             fi
-            
+
             RETRY=$((RETRY + 1))
             echo "Push failed, retry $RETRY/$MAX_RETRIES"
-            
+
             if [ $RETRY -lt $MAX_RETRIES ]; then
               git pull --rebase origin "${{ github.ref_name }}"
               sleep 2
             fi
           done
-          
+
           echo "❌ Push failed after $MAX_RETRIES attempts"
           exit 1
 
@@ -219,5 +236,5 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Changes" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
-          echo "${{ steps.detect.outputs.entries }}" >> $GITHUB_STEP_SUMMARY
+          echo "See CHANGELOG.md for details" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
