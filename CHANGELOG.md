@@ -7,9 +7,11 @@ and this project adheres to semantic versioning.
 
 
 ## [Unreleased]
+
 ### Added
 - Package `bashxt` v2.2 - basic command, code color, shortcut keyboar, etc information
 - Package `aura` v0.8.2 - Adaptive Unified Runtime Assistant
+- Package `tx` v1.0.0 - Advance Terminal Editor Ultimate
 
 ### Changed
 - Package `impulse` v1.0.0 - Updated metadata
