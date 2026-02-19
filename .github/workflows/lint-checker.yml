@@ -308,21 +308,21 @@ jobs:
         uses: actions-ecosystem/action-remove-labels@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          labels: review-approved, review-failed
+          labels: checker-approved, checker-failed
 
       - name: Add review-approved label (auto-triggers pr-checker.yml)
         if: steps.status.outputs.overall_status == '0'
         uses: actions-ecosystem/action-add-labels@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          labels: review-approved
+          labels: checker-approved
 
       - name: Add review-failed label
         if: steps.status.outputs.overall_status == '1'
         uses: actions-ecosystem/action-add-labels@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          labels: review-failed
+          labels: checker-failed
 
       - name: Comment - Validation Failed
         if: steps.status.outputs.overall_status == '1'
@@ -387,7 +387,7 @@ jobs:
             - ✅ SRCURL is valid and reachable
             - ✅ SHA256 checksum verified successfully
 
-            **Label `review-approved` has been added automatically.**
+            **Label `checker-approved` has been added automatically.**
 
             This will trigger the package review workflow for detailed inspection.
             
