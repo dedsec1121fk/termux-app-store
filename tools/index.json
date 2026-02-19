@@ -1,7 +1,7 @@
 {
   "version": "1.0",
   "repository": "https://github.com/djunekz/termux-app-store",
-  "generated_at": "2026-02-19T02:30:38.360251+00:00",
+  "generated_at": "2026-02-19T08:05:05.439590+00:00",
   "total": 14,
   "packages": [
     {
@@ -62,7 +62,7 @@
       "download_size": "Unknown",
       "installed_size": "Unknown",
       "source": "https://github.com/djunekz/termux-app-store",
-      "srcurl": "https://github.com/droidv1/termool/releases/download/v${TERMUX_PKG_VERSION}/ghostrack.tar.gz",
+      "srcurl": "https://github.com/djunekz/archive/releases/download/v${TERMUX_PKG_VERSION}/ghostrack.tar.gz",
       "sha256": "43c5fe4734ef358fe17659a08b5846682d43f046e880233503f7412ebbdf1238",
       "platform_independent": false
     },
