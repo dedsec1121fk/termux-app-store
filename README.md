@@ -12,7 +12,7 @@
 [![Codecov](https://codecov.io/github/djunekz/termux-app-store/branch/master/graph/badge.svg?token=357W4EP8G0)](https://codecov.io/github/djunekz/termux-app-store)
 [![Release](https://img.shields.io/github/v/release/djunekz/termux-app-store.svg?style=flat&logo=iterm2&color=3fb950)](https://github.com/djunekz/termux-app-store/releases)
 [![Downloads](https://img.shields.io/github/downloads/djunekz/termux-app-store/total?style=flat&logo=abdownloadmanager&logoColor=white&color=3fb950)](https://github.com/djunekz/termux-app-store)
-[![License](https://img.shields.io/github/license/djunekz/termux-app-store.svg?style=flat&color=3fb950)](LICENSE)
+[![License](https://img.shields.io/badge/-MITLicense-OB6623?logo=cachet&logoColor=white)](LICENSE)
 
 [![Stars](https://img.shields.io/github/stars/djunekz/termux-app-store?logo=starship&color=3fb950&logoColor=black)](https://github.com/djunekz/termux-app-store/stargazers)
 [![Forks](https://img.shields.io/github/forks/djunekz/termux-app-store?logo=refinedgithub&color=3fb950)](https://github.com/djunekz/termux-app-store/network)
