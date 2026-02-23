@@ -106,7 +106,140 @@ if [[ ! -f "$BUILD_SH" ]]; then
   exit 1
 fi
 
+# =============================================
+#  SYNTAX CHECK build.sh SEBELUM SOURCE
+# =============================================
+_section "Validating build.sh"
+
+# Cek apakah file kosong / hanya whitespace
+if [[ ! -s "$BUILD_SH" ]] || ! grep -qE '[^[:space:]]' "$BUILD_SH"; then
+  _fatal "build.sh is empty"
+  echo ""
+  printf "  ${BRED}╭─ Error: Empty build script${R}\n"
+  printf "  ${BRED}│${R}\n"
+  printf "  ${BRED}│${R}  ${WHITE}File ditemukan tapi tidak ada konten${R}\n"
+  printf "  ${BRED}│${R}\n"
+  printf "  ${BRED}│${R}  ${GRAY}File:${R} $BUILD_SH\n"
+  printf "  ${BRED}│${R}\n"
+  printf "  ${BRED}│${R}  ${BYELLOW}Minimal isi dengan:${R}\n"
+  printf "  ${BRED}│${R}  ${GRAY}TERMUX_PKG_HOMEPAGE=https://example.com${R}\n"
+  printf "  ${BRED}│${R}  ${GRAY}TERMUX_PKG_DESCRIPTION=\"My package\"${R}\n"
+  printf "  ${BRED}│${R}  ${GRAY}TERMUX_PKG_VERSION=1.0.0${R}\n"
+  printf "  ${BRED}╰─${R}\n"
+  echo ""
+  exit 1
+fi
+
+# Syntax check via bash -n
+_SYNTAX_ERR=$(bash -n "$BUILD_SH" 2>&1)
+if [[ $? -ne 0 ]] || [[ -n "$_SYNTAX_ERR" ]]; then
+  _fatal "Syntax error in build.sh"
+  echo ""
+  # Parse baris error
+  _ERR_LINE=$(echo "$_SYNTAX_ERR" | grep -oP '(?<=line )\d+' | head -1)
+  _ERR_MSG=$(echo "$_SYNTAX_ERR" | sed "s|$BUILD_SH: ||g")
+  printf "  ${BRED}╭─ Syntax Error${R}\n"
+  printf "  ${BRED}│${R}\n"
+  if [[ -n "$_ERR_LINE" ]]; then
+    printf "  ${BRED}│${R}  ${GRAY}Line ${BYELLOW}$_ERR_LINE${R}:  ${WHITE}$_ERR_MSG${R}\n"
+    printf "  ${BRED}│${R}\n"
+    printf "  ${BRED}│${R}  ${GRAY}Context (lines around error):${R}\n"
+    printf "  ${BRED}│${R}\n"
+    _START=$(( _ERR_LINE - 3 ))
+    [[ $_START -lt 1 ]] && _START=1
+    _END=$(( _ERR_LINE + 2 ))
+    _LINENUM=$_START
+    while IFS= read -r _L; do
+      if [[ "$_LINENUM" -eq "$_ERR_LINE" ]]; then
+        printf "  ${BRED}│${R}  ${BG_RED}${BLACK}${BOLD} %-4s ${R}  ${BRED}%s${R}\n" "$_LINENUM" "$_L"
+      else
+        printf "  ${BRED}│${R}  ${GRAY} %-4s ${R}  ${WHITE}%s${R}\n" "$_LINENUM" "$_L"
+      fi
+      (( _LINENUM++ ))
+    done < <(sed -n "${_START},${_END}p" "$BUILD_SH")
+    printf "  ${BRED}│${R}\n"
+    printf "  ${BRED}│${R}  ${BYELLOW}Tip:${R} Periksa tanda kutip, kurung kurawal, atau EOF yang tidak lengkap\n"
+  else
+    printf "  ${BRED}│${R}  ${WHITE}$_ERR_MSG${R}\n"
+  fi
+  printf "  ${BRED}│${R}\n"
+  printf "  ${BRED}╰─ Fix in: ${BCYAN}nano $BUILD_SH${R}\n"
+  echo ""
+  exit 1
+fi
+
+_ok "Syntax OK"
+
+# Source build.sh
 source "$BUILD_SH"
+
+# =============================================
+#  FIELD VALIDATION (setelah source)
+# =============================================
+_FIELD_ERRORS=()
+_FIELD_WARNS=()
+
+# Field wajib
+[[ -z "${TERMUX_PKG_HOMEPAGE:-}"    ]] && _FIELD_ERRORS+=("TERMUX_PKG_HOMEPAGE   │  (empty)  — URL homepage paket")
+[[ -z "${TERMUX_PKG_DESCRIPTION:-}" ]] && _FIELD_ERRORS+=("TERMUX_PKG_DESCRIPTION│  (empty)  — Deskripsi singkat paket")
+[[ -z "${TERMUX_PKG_LICENSE:-}"     ]] && _FIELD_ERRORS+=("TERMUX_PKG_LICENSE    │  (empty)  — Lisensi (MIT, GPL-3.0, dll)")
+[[ -z "${TERMUX_PKG_VERSION:-}"     ]] && _FIELD_ERRORS+=("TERMUX_PKG_VERSION    │  (empty)  — Versi paket (harus mulai angka)")
+
+# Field opsional tapi disarankan
+[[ -z "${TERMUX_PKG_MAINTAINER:-}"  ]] && _FIELD_WARNS+=("TERMUX_PKG_MAINTAINER │  (empty)  — Nama/handle maintainer")
+
+if [[ ${#_FIELD_ERRORS[@]} -gt 0 ]] || [[ ${#_FIELD_WARNS[@]} -gt 0 ]]; then
+  echo ""
+  if [[ ${#_FIELD_ERRORS[@]} -gt 0 ]]; then
+    _fatal "Missing required fields in build.sh"
+    echo ""
+    printf "  ${BRED}╭─ Field Validation Failed${R}\n"
+    printf "  ${BRED}│${R}\n"
+    printf "  ${BRED}│${R}  ${WHITE}Field berikut wajib diisi:${R}\n"
+    printf "  ${BRED}│${R}\n"
+    for _fe in "${_FIELD_ERRORS[@]}"; do
+      _fname=$(echo "$_fe" | cut -d'│' -f1 | xargs)
+      _fdesc=$(echo "$_fe" | cut -d'│' -f2- | xargs)
+      printf "  ${BRED}│${R}  ${BRED}✗${R}  ${BOLD}${BYELLOW}%-28s${R}  ${GRAY}%s${R}\n" "$_fname" "$_fdesc"
+    done
+    if [[ ${#_FIELD_WARNS[@]} -gt 0 ]]; then
+      printf "  ${BRED}│${R}\n"
+      printf "  ${BRED}│${R}  ${WHITE}Field berikut disarankan diisi:${R}\n"
+      printf "  ${BRED}│${R}\n"
+      for _fw in "${_FIELD_WARNS[@]}"; do
+        _fname=$(echo "$_fw" | cut -d'│' -f1 | xargs)
+        _fdesc=$(echo "$_fw" | cut -d'│' -f2- | xargs)
+        printf "  ${BRED}│${R}  ${BYELLOW}⚠${R}  ${BOLD}${GRAY}%-28s${R}  ${GRAY}%s${R}\n" "$_fname" "$_fdesc"
+      done
+    fi
+    printf "  ${BRED}│${R}\n"
+    printf "  ${BRED}│${R}  ${GRAY}Contoh build.sh minimal yang valid:${R}\n"
+    printf "  ${BRED}│${R}\n"
+    printf "  ${BRED}│${R}  ${GRAY}TERMUX_PKG_HOMEPAGE=https://github.com/user/pkg${R}\n"
+    printf "  ${BRED}│${R}  ${GRAY}TERMUX_PKG_DESCRIPTION=\"A cool package\"${R}\n"
+    printf "  ${BRED}│${R}  ${GRAY}TERMUX_PKG_LICENSE=\"MIT\"${R}\n"
+    printf "  ${BRED}│${R}  ${GRAY}TERMUX_PKG_MAINTAINER=\"@username\"${R}\n"
+    printf "  ${BRED}│${R}  ${GRAY}TERMUX_PKG_VERSION=1.0.0${R}\n"
+    printf "  ${BRED}│${R}\n"
+    printf "  ${BRED}╰─ Fix in: ${BCYAN}nano $BUILD_SH${R}\n"
+    echo ""
+    exit 1
+  else
+    # Hanya warnings
+    printf "  ${BYELLOW}╭─ Field Warnings${R}\n"
+    printf "  ${BYELLOW}│${R}\n"
+    for _fw in "${_FIELD_WARNS[@]}"; do
+      _fname=$(echo "$_fw" | cut -d'│' -f1 | xargs)
+      _fdesc=$(echo "$_fw" | cut -d'│' -f2- | xargs)
+      printf "  ${BYELLOW}│${R}  ${BYELLOW}⚠${R}  ${BOLD}${GRAY}%-28s${R}  ${GRAY}%s${R}\n" "$_fname" "$_fdesc"
+    done
+    printf "  ${BYELLOW}│${R}\n"
+    printf "  ${BYELLOW}╰─ Build dilanjutkan (warnings tidak memblokir build)${R}\n"
+    echo ""
+  fi
+fi
+
+_ok "Fields validated"
 
 # =============================================
 #  VALIDATION & SANITIZATION
@@ -222,7 +355,23 @@ if [[ -n "${TERMUX_PKG_DEPENDS:-}" ]]; then
     dep="$(echo "$dep" | tr -d ' ')"
     printf "      ${GRAY}+${R} ${WHITE}%s${R}\n" "$dep"
   done
-  pkg install -y $(tr ',' ' ' <<<"$TERMUX_PKG_DEPENDS")
+
+  # Spinner saat pkg install
+  _spin_chars='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
+  _spin_i=0
+  _PKG_LOG=$(mktemp)
+  pkg install -y $(tr ',' ' ' <<<"$TERMUX_PKG_DEPENDS") > "$_PKG_LOG" 2>&1 &
+  _PKG_PID=$!
+  while kill -0 "$_PKG_PID" 2>/dev/null; do
+    _sc="${_spin_chars:$(( _spin_i % ${#_spin_chars} )):1}"
+    printf "\r  ${BCYAN}[  %s  ]${R}  Installing dependencies..." "$_sc"
+    sleep 0.1
+    (( _spin_i++ )) || true
+  done
+  wait "$_PKG_PID" || true
+  printf "\r%*s\r" "$(tput cols)" ""
+  rm -f "$_PKG_LOG"
+
   _ok "Dependencies installed"
 else
   _skip "No dependencies required"
@@ -349,14 +498,54 @@ if [[ -n "${TERMUX_PKG_SRCURL:-}" ]]; then
   _section "Downloading Source"
   _progress "Fetching source..."
   _detail "URL:" "${TERMUX_PKG_SRCURL}"
-  curl -fL --progress-bar "$TERMUX_PKG_SRCURL" -o "$SRC_FILE"
-  echo ""
+
+  # Spinner download — clean, no ugly progress bar
+  _spin_chars='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
+  _spin_i=0
+  curl -fL --silent --retry 3 --retry-delay 2 --connect-timeout 30 "$TERMUX_PKG_SRCURL" -o "$SRC_FILE" &
+  _CURL_PID=$!
+  while kill -0 "$_CURL_PID" 2>/dev/null; do
+    _sc="${_spin_chars:$(( _spin_i % ${#_spin_chars} )):1}"
+    _SIZE=$(du -sh "$SRC_FILE" 2>/dev/null | awk '{print $1}' || echo "...")
+    printf "\r  ${BCYAN}[  %s  ]${R}  Downloading... ${GRAY}%s${R}%-10s" "$_sc" "$_SIZE" " "
+    sleep 0.2
+    (( _spin_i++ )) || true
+  done
+  wait "$_CURL_PID"
+  _CURL_EXIT=$?
+  printf "\r%*s\r" "$(tput cols)" ""
+  if [[ $_CURL_EXIT -ne 0 ]]; then
+    _fatal "Download failed (curl exit $_CURL_EXIT)"
+    exit 1
+  fi
+
   _ok "Download complete"
   _HAS_SOURCE=1
 
   # ==========================================
   #  SHA256
   # ==========================================
+  if [[ -z "${TERMUX_PKG_SHA256:-}" ]]; then
+    # SHA256 kosong — hitung dan tampilkan, lalu fatal
+    _CALC=$(sha256sum "$SRC_FILE" | awk '{print $1}')
+    echo ""
+    _fatal "TERMUX_PKG_SHA256 is empty"
+    echo ""
+    printf "  ${BRED}╭─ Security Error${R}\n"
+    printf "  ${BRED}│${R}\n"
+    printf "  ${BRED}│${R}  ${WHITE}SHA256 wajib diisi untuk verifikasi integritas file${R}\n"
+    printf "  ${BRED}│${R}\n"
+    printf "  ${BRED}│${R}  ${GRAY}File yang didownload:${R} $(du -sh "$SRC_FILE" | awk '{print $1}')\n"
+    printf "  ${BRED}│${R}  ${GRAY}SHA256:${R}  ${BGREEN}$_CALC${R}\n"
+    printf "  ${BRED}│${R}\n"
+    printf "  ${BRED}│${R}  ${BYELLOW}Tambahkan baris berikut ke build.sh:${R}\n"
+    printf "  ${BRED}│${R}  ${GRAY}TERMUX_PKG_SHA256=%s${R}\n" "$_CALC"
+    printf "  ${BRED}│${R}\n"
+    printf "  ${BRED}╰─ Fix in: ${BCYAN}$BUILD_SH${R}\n"
+    echo ""
+    exit 1
+  fi
+
   if [[ -n "${TERMUX_PKG_SHA256:-}" ]]; then
     _section "Integrity Check (SHA256)"
     _progress "Computing checksum..."
@@ -540,7 +729,21 @@ if declare -f termux_step_make > /dev/null 2>&1; then
 
   _MAKE_LOG=$(mktemp)
   _MAKE_EXIT=0
-  termux_step_make 2>&1 | tee "$_MAKE_LOG" || _MAKE_EXIT=${PIPESTATUS[0]}
+
+  # Spinner saat build
+  _spin_chars='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
+  _spin_i=0
+  termux_step_make > "$_MAKE_LOG" 2>&1 &
+  _MAKE_PID=$!
+  while kill -0 "$_MAKE_PID" 2>/dev/null; do
+    _sc="${_spin_chars:$(( _spin_i % ${#_spin_chars} )):1}"
+    printf "\r  ${BCYAN}[  %s  ]${R}  Building..." "$_sc"
+    sleep 0.1
+    (( _spin_i++ )) || true
+  done
+  wait "$_MAKE_PID" || _MAKE_EXIT=$?
+  printf "\r%*s\r" "$(tput cols)" ""
+
   _MAKE_OUTPUT=$(cat "$_MAKE_LOG")
   rm -f "$_MAKE_LOG"
 
@@ -607,7 +810,27 @@ elif declare -f termux_step_make_install > /dev/null 2>&1; then
   # Jalankan termux_step_make_install dengan error handling
   _INSTALL_LOG=$(mktemp)
   _INSTALL_EXIT=0
-  termux_step_make_install 2>&1 | tee "$_INSTALL_LOG" || _INSTALL_EXIT=${PIPESTATUS[0]}
+
+  # Spinner + live status dari log
+  _spin_chars='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
+  _spin_i=0
+  termux_step_make_install > "$_INSTALL_LOG" 2>&1 &
+  _INSTALL_PID=$!
+  while kill -0 "$_INSTALL_PID" 2>/dev/null; do
+    _sc="${_spin_chars:$(( _spin_i % ${#_spin_chars} )):1}"
+    # Ambil baris terakhir dari log sebagai status hint
+    _last_line=$(tail -n1 "$_INSTALL_LOG" 2>/dev/null | tr -d '\r\n' | sed 's/\x1b\[[0-9;]*m//g' | cut -c1-40)
+    if [[ -n "$_last_line" ]]; then
+      printf "\r  ${BCYAN}[  %s  ]${R}  ${GRAY}%s${R}%-20s" "$_sc" "$_last_line" " "
+    else
+      printf "\r  ${BCYAN}[  %s  ]${R}  Running install...%-20s" "$_sc" " "
+    fi
+    sleep 0.15
+    (( _spin_i++ )) || true
+  done
+  wait "$_INSTALL_PID" || _INSTALL_EXIT=$?
+  printf "\r%*s\r" "$(tput cols)" ""
+
   _INSTALL_OUTPUT=$(cat "$_INSTALL_LOG")
   rm -f "$_INSTALL_LOG"
 
@@ -693,10 +916,54 @@ elif declare -f termux_step_make_install > /dev/null 2>&1; then
   _progress "Staging installed files..."
   mkdir -p "$WORK_DIR/pkg$PREFIX/bin" "$WORK_DIR/pkg$PREFIX/lib"
 
+  # Stage binary
   [[ -f "$PREFIX/bin/$PACKAGE" ]] && \
     install -Dm755 "$PREFIX/bin/$PACKAGE" "$WORK_DIR/pkg$PREFIX/bin/$PACKAGE"
-  [[ -d "$PREFIX/lib/$PACKAGE" ]] && \
+
+  # Stage pip entry_point binaries (nama bisa berbeda dari PACKAGE)
+  _PY_SITE_TMP=$(python3 -c "import site; print(site.getsitepackages()[0])" 2>/dev/null || true)
+  if [[ -n "$_PY_SITE_TMP" ]]; then
+    _EP_FILE=$(find "$_PY_SITE_TMP" -maxdepth 2 -iname "entry_points.txt" -path "*${PACKAGE}*" 2>/dev/null | head -1 || true)
+    if [[ -n "$_EP_FILE" ]]; then
+      grep -A50 "\[console_scripts\]" "$_EP_FILE" 2>/dev/null | grep "=" | while IFS='=' read -r _ep_name _; do
+        _ep_name=$(echo "$_ep_name" | tr -d ' ')
+        [[ -f "$PREFIX/bin/$_ep_name" ]] && \
+          install -Dm755 "$PREFIX/bin/$_ep_name" "$WORK_DIR/pkg$PREFIX/bin/$_ep_name" && \
+          _detail "Staged bin:" "$PREFIX/bin/$_ep_name"
+      done
+    fi
+  fi
+
+  # Stage lib/$PACKAGE (non-npm)
+  if [[ -d "$PREFIX/lib/$PACKAGE" ]]; then
     cp -r "$PREFIX/lib/$PACKAGE" "$WORK_DIR/pkg$PREFIX/lib/"
+    _detail "Staged lib:" "$PREFIX/lib/$PACKAGE"
+  fi
+
+  # Stage lib/node_modules/$PACKAGE (npm install -g)
+  if [[ -d "$PREFIX/lib/node_modules/$PACKAGE" ]]; then
+    mkdir -p "$WORK_DIR/pkg$PREFIX/lib/node_modules"
+    cp -r "$PREFIX/lib/node_modules/$PACKAGE" "$WORK_DIR/pkg$PREFIX/lib/node_modules/"
+    _detail "Staged npm:" "$PREFIX/lib/node_modules/$PACKAGE"
+  fi
+
+  # Stage Python site-packages (pip install)
+  _PY_SITE=$(python3 -c "import site; print(site.getsitepackages()[0])" 2>/dev/null || true)
+  if [[ -n "$_PY_SITE" ]]; then
+    # Cari package di site-packages berdasarkan nama (case-insensitive)
+    _PY_PKG=$(find "$_PY_SITE" -maxdepth 1 -iname "${PACKAGE}" -o \
+                               -maxdepth 1 -iname "${PACKAGE}-*.dist-info" 2>/dev/null | \
+              grep -v "dist-info" | head -1 || true)
+    if [[ -n "$_PY_PKG" ]]; then
+      _PY_SITE_DEST="$WORK_DIR/pkg$_PY_SITE"
+      mkdir -p "$_PY_SITE_DEST"
+      cp -r "$_PY_PKG" "$_PY_SITE_DEST/"
+      # Juga copy dist-info supaya pip/dpkg tahu package terinstall
+      find "$_PY_SITE" -maxdepth 1 -iname "${PACKAGE}-*.dist-info" -exec cp -r {} "$_PY_SITE_DEST/" \; 2>/dev/null || true
+      _detail "Staged pip:" "$_PY_PKG"
+    fi
+  fi
+
   [[ -d "$PREFIX/share/doc/$PACKAGE" ]] && \
     mkdir -p "$WORK_DIR/pkg$PREFIX/share/doc" && \
     cp -r "$PREFIX/share/doc/$PACKAGE" "$WORK_DIR/pkg$PREFIX/share/doc/"
@@ -727,7 +994,21 @@ else
     _progress "Running npm install -g..."
     _NPM_LOG=$(mktemp)
     _NPM_EXIT=0
-    npm install -g --prefix "$PREFIX" "$_NODE_SRC_DIR" 2>&1 | tee "$_NPM_LOG" || _NPM_EXIT=${PIPESTATUS[0]}
+
+    # Spinner saat npm install (bisa lama)
+    _spin_chars='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
+    _spin_i=0
+    npm install -g --prefix "$PREFIX" "$_NODE_SRC_DIR" > "$_NPM_LOG" 2>&1 &
+    _NPM_PID=$!
+    while kill -0 "$_NPM_PID" 2>/dev/null; do
+      _sc="${_spin_chars:$(( _spin_i % ${#_spin_chars} )):1}"
+      printf "\r  ${BCYAN}[  %s  ]${R}  Installing packages..." "$_sc"
+      sleep 0.1
+      (( _spin_i++ )) || true
+    done
+    wait "$_NPM_PID" || _NPM_EXIT=$?
+    printf "\r%*s\r" "$(tput cols)" ""
+
     _NPM_OUTPUT=$(cat "$_NPM_LOG")
     rm -f "$_NPM_LOG"
 
