@@ -1,9 +1,40 @@
 {
   "version": "1.0",
   "repository": "https://github.com/djunekz/termux-app-store",
-  "generated_at": "2026-02-23T02:31:54.244242+00:00",
-  "total": 16,
+  "generated_at": "2026-02-23T11:31:53.637413+00:00",
+  "total": 23,
   "packages": [
+    {
+      "package": "aircrack-ng",
+      "version": "1.7",
+      "maintainer": "@termux-app-store",
+      "description": "aircrack-ng for termux package",
+      "homepage": "https://github.com/pitube08642/aircrack-ng-for-termux",
+      "license": "UNKNOWN",
+      "download_size": "Unknown",
+      "installed_size": "Unknown",
+      "source": "https://github.com/djunekz/termux-app-store",
+      "srcurl": "https://github.com/pitube08642/aircrack-ng-for-termux/releases/download/Aircrack-ng_termux/aircrack-ng_3_1.7_aarch64.deb",
+      "sha256": "809dcc9f0405e170bd1ef8e63d4f7411a49167cee2eb316842e0dd13e3073aa6",
+      "platform_independent": false
+    },
+    {
+      "package": "ani-cli",
+      "version": "4.10",
+      "maintainer": "@termux-app-store",
+      "description": "A cli tool to browse and play anime",
+      "homepage": "https://github.com/pystardust/ani-cli",
+      "license": "GPL-3.0",
+      "download_size": "Unknown",
+      "installed_size": "Unknown",
+      "source": "https://github.com/djunekz/termux-app-store",
+      "srcurl": "https://github.com/pystardust/ani-cli/releases/download/v${TERMUX_PKG_VERSION}/ani-cli",
+      "sha256": "38599dc5bb65a5b9f78e936ed42ffe16b62095dbc6621a5b578ed3e29aac4f3e",
+      "platform_independent": false,
+      "depends": [
+        "nodejs"
+      ]
+    },
     {
       "package": "aura",
       "version": "0.8.2",
@@ -67,6 +98,20 @@
       "platform_independent": false
     },
     {
+      "package": "fd",
+      "version": "10.3.0",
+      "maintainer": "@termux-app-store",
+      "description": "A simple, fast and user-friendly alternative to 'find'",
+      "homepage": "https://github.com/sharkdp/fd",
+      "license": "Apache-2.0",
+      "download_size": "Unknown",
+      "installed_size": "Unknown",
+      "source": "https://github.com/djunekz/termux-app-store",
+      "srcurl": "https://github.com/sharkdp/fd/releases/download/v${TERMUX_PKG_VERSION}/fd-v${TERMUX_PKG_VERSION}-aarch64-unknown-linux-musl.tar.gz",
+      "sha256": "996b9b1366433b211cb3bbedba91c9dbce2431842144d925428ead0adf32020b",
+      "platform_independent": false
+    },
+    {
       "package": "ghostrack",
       "version": "1.0.0",
       "maintainer": "@termux-app-store",
@@ -106,6 +151,48 @@
       "source": "https://github.com/djunekz/termux-app-store",
       "srcurl": "https://github.com/djunekz/archive/releases/download/v${TERMUX_PKG_VERSION}/iptrack.tar.gz",
       "sha256": "7bbaf211e73e7e9c86eee7138abfaf9ccb9b9ed3f84f3933cb3f60db0e10156b",
+      "platform_independent": false
+    },
+    {
+      "package": "lux",
+      "version": "0.24.1",
+      "maintainer": "@termux-app-store",
+      "description": "Fast and simple video download library and CLI tool written in Go",
+      "homepage": "https://github.com/iawia002/lux",
+      "license": "MIT",
+      "download_size": "Unknown",
+      "installed_size": "Unknown",
+      "source": "https://github.com/djunekz/termux-app-store",
+      "srcurl": "https://github.com/iawia002/lux/releases/download/v${TERMUX_PKG_VERSION}/lux_${TERMUX_PKG_VERSION}_Linux_arm64.tar.gz",
+      "sha256": "479b09290b8ddda43c994ec5685649eb4635f4bd24ff24e494eddaae473879d7",
+      "platform_independent": false
+    },
+    {
+      "package": "maskphish",
+      "version": "2.0",
+      "maintainer": "@termux-app-store",
+      "description": "URL Making Technology to the world for the very tool for Phishing.",
+      "homepage": "https://github.com/jaykali/maskphish",
+      "license": "MIT",
+      "download_size": "Unknown",
+      "installed_size": "Unknown",
+      "source": "https://github.com/djunekz/termux-app-store",
+      "srcurl": "https://api.github.com/repos/jaykali/maskphish/tarball/${TERMUX_PKG_VERSION}",
+      "sha256": "dbace1301bcc946edfd1cc977f9dc9633e198ad035c9f23c69232388b53ae112",
+      "platform_independent": false
+    },
+    {
+      "package": "metasploit",
+      "version": "2.5.0",
+      "maintainer": "@termux-app-store",
+      "description": "Installer Latest Metasploit In Termux (2026). Features automatic Ruby 3.4+ Nokogiri/Gumbo patches, PostgreSQL auto-fix, and silent installation logic.",
+      "homepage": "https://github.com/h4ck3r0/Metasploit-termux",
+      "license": "GPL-3.0",
+      "download_size": "Unknown",
+      "installed_size": "Unknown",
+      "source": "https://github.com/djunekz/termux-app-store",
+      "srcurl": "https://api.github.com/repos/h4ck3r0/Metasploit-termux/tarball/${TERMUX_PKG_VERSION}",
+      "sha256": "67ef935750a14c1c13b6471d6b9e1b0da69dae8cf4cfee3d1a0512881be37c07",
       "platform_independent": false
     },
     {
@@ -256,6 +343,20 @@
       "source": "https://github.com/djunekz/termux-app-store",
       "srcurl": "https://github.com/djunekz/archive/releases/download/v${TERMUX_PKG_VERSION}/zoravuln",
       "sha256": "e8f3bb069cdd9afbc238c5d55ca0046b35e853590af061261e2d95e4cc8ec89e",
+      "platform_independent": false
+    },
+    {
+      "package": "zx",
+      "version": "8.8.5",
+      "maintainer": "@termux-app-store",
+      "description": "A tool for writing better scripts",
+      "homepage": "https://github.com/google/zx",
+      "license": "Apache-2.0",
+      "download_size": "Unknown",
+      "installed_size": "Unknown",
+      "source": "https://github.com/djunekz/termux-app-store",
+      "srcurl": "https://api.github.com/repos/google/zx/tarball/${TERMUX_PKG_VERSION}",
+      "sha256": "7d1594daa43df8bf2b49738db628f6d66646e494f3151750c373da012d189976",
       "platform_independent": false
     }
   ]
