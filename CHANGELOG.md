@@ -17,7 +17,6 @@ and this project adheres to semantic versioning.
 - Package `fd` v10.3.0 - A simple, fast and user-friendly alternative to find
 - Package `lux` v0.24.1 - Fast and simple video download library and CLI tool written in Go
 - Package `maskphish` v2.0 - URL Making Technology to the world for the very tool for Phishing.
-- Package `metasploit` v2.5.0 - Installer Latest Metasploit In Termux (2026). Features automatic Ruby 3.4+ Nokogiri/Gumbo patches, PostgreSQL auto-fix, and silent installation logic.
 - Package `zx` v8.8.5 - A tool for writing better scripts
 
 ### Changed
