@@ -18,6 +18,12 @@ and this project adheres to semantic versioning.
 - Package `lux` v0.24.1 - Fast and simple video download library and CLI tool written in Go
 - Package `maskphish` v2.0 - URL Making Technology to the world for the very tool for Phishing.
 - Package `zx` v8.8.5 - A tool for writing better scripts
+- Package `bower` v1.8.12 - A package manager for the web
+- Package `infoooze` v1.1.9 - A OSINT tool which helps you to quickly find information effectively.
+- Package `pnpm` v10.30.1 - Fast, disk space efficient package manager
+- Package `sigit` v2.0-pre - SIGIT - Simple Information Gathering Toolkit
+- Package `tuifimanager` v5.2.6 - A terminal-based TUI file manager
+- Package `uv` v0.10.4 - An extremely fast Python package and project manager, written in Rust.
 
 ### Changed
 - Package `impulse` v1.0.0 - Updated metadata
