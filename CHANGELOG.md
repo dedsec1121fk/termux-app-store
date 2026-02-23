@@ -12,6 +12,13 @@ and this project adheres to semantic versioning.
 - Package `bashxt` v2.2 - basic command, code color, shortcut keyboar, etc information
 - Package `aura` v0.8.2 - Adaptive Unified Runtime Assistant
 - Package `tx` v1.0.0 - Advance Terminal Editor Ultimate
+- Package `aircrack-ng` v1.7 - aircrack-ng for termux package
+- Package `ani-cli` v4.10 - A cli tool to browse and play anime
+- Package `fd` v10.3.0 - A simple, fast and user-friendly alternative to find
+- Package `lux` v0.24.1 - Fast and simple video download library and CLI tool written in Go
+- Package `maskphish` v2.0 - URL Making Technology to the world for the very tool for Phishing.
+- Package `metasploit` v2.5.0 - Installer Latest Metasploit In Termux (2026). Features automatic Ruby 3.4+ Nokogiri/Gumbo patches, PostgreSQL auto-fix, and silent installation logic.
+- Package `zx` v8.8.5 - A tool for writing better scripts
 
 ### Changed
 - Package `impulse` v1.0.0 - Updated metadata
