@@ -1,8 +1,8 @@
 {
   "version": "1.0",
   "repository": "https://github.com/djunekz/termux-app-store",
-  "generated_at": "2026-02-23T11:35:53.451387+00:00",
-  "total": 22,
+  "generated_at": "2026-02-23T13:58:49.079549+00:00",
+  "total": 28,
   "packages": [
     {
       "package": "aircrack-ng",
@@ -84,6 +84,23 @@
       ]
     },
     {
+      "package": "bower",
+      "version": "1.8.12",
+      "maintainer": "@termux-app-store",
+      "description": "A package manager for the web",
+      "homepage": "https://github.com/bower/bower",
+      "license": "MIT",
+      "download_size": "Unknown",
+      "installed_size": "Unknown",
+      "source": "https://github.com/djunekz/termux-app-store",
+      "srcurl": "https://api.github.com/repos/bower/bower/tarball/v${TERMUX_PKG_VERSION}",
+      "sha256": "d54d92c4a12c674e79ed38742bd82b797098c24e67391c963555cf4a23855e01",
+      "platform_independent": false,
+      "depends": [
+        "nodejs"
+      ]
+    },
+    {
       "package": "encrypt",
       "version": "1.1",
       "maintainer": "@djunekz",
@@ -138,6 +155,23 @@
       "srcurl": "https://github.com/djunekz/archive/releases/download/v${TERMUX_PKG_VERSION}/impulse.tar.gz",
       "sha256": "d03e1a4c74a09b63900ffd1bc889bbc8f5720b83914b1a2fdd5453fb23a63c18",
       "platform_independent": false
+    },
+    {
+      "package": "infoooze",
+      "version": "1.1.9",
+      "maintainer": "@termux-app-store",
+      "description": "A OSINT tool which helps you to quickly find information effectively.",
+      "homepage": "https://github.com/devxprite/infoooze",
+      "license": "MIT",
+      "download_size": "Unknown",
+      "installed_size": "Unknown",
+      "source": "https://github.com/djunekz/termux-app-store",
+      "srcurl": "https://api.github.com/repos/devxprite/infoooze/tarball/v1.1.9",
+      "sha256": "b856ff7dc73ac57985372d833429c89cf03f52105039e48b71aee6d628abeb36",
+      "platform_independent": false,
+      "depends": [
+        "nodejs"
+      ]
     },
     {
       "package": "iptrack",
@@ -201,6 +235,20 @@
       ]
     },
     {
+      "package": "pnpm",
+      "version": "10.30.1",
+      "maintainer": "@termux-app-store",
+      "description": "Fast, disk space efficient package manager",
+      "homepage": "https://github.com/pnpm/pnpm",
+      "license": "MIT",
+      "download_size": "Unknown",
+      "installed_size": "Unknown",
+      "source": "https://github.com/djunekz/termux-app-store",
+      "srcurl": "https://registry.npmjs.org/pnpm/-/pnpm-${TERMUX_PKG_VERSION}.tgz",
+      "sha256": "bc8bb877378eab6a8a83114eeb6a31ef88528db4ab5570299baba8fa54da2375",
+      "platform_independent": false
+    },
+    {
       "package": "pymaker",
       "version": "1.0.0",
       "maintainer": "@droidv1",
@@ -212,6 +260,20 @@
       "source": "https://github.com/djunekz/termux-app-store",
       "srcurl": "https://github.com/djunekz/archive/releases/download/v${TERMUX_PKG_VERSION}/pymaker-${TERMUX_PKG_VERSION}.tar.gz",
       "sha256": "2fe03f6839e7b550f888d477628b852d648ea4ed688643122d3c182d495564e4",
+      "platform_independent": false
+    },
+    {
+      "package": "sigit",
+      "version": "2.0-pre",
+      "maintainer": "@termux-app-store",
+      "description": "SIGIT - Simple Information Gathering Toolkit",
+      "homepage": "https://github.com/termuxhackers-id/SIGIT",
+      "license": "UNKNOWN",
+      "download_size": "Unknown",
+      "installed_size": "Unknown",
+      "source": "https://github.com/djunekz/termux-app-store",
+      "srcurl": "https://api.github.com/repos/termuxhackers-id/SIGIT/tarball/2.0-pre",
+      "sha256": "2bfe129b478dc758133f6380dc5f1c27da8af2c3cfe7327e826d4f974e20c993",
       "platform_independent": false
     },
     {
@@ -251,6 +313,23 @@
       "platform_independent": false
     },
     {
+      "package": "tuifimanager",
+      "version": "5.2.6",
+      "maintainer": "@termux-app-store",
+      "description": "A terminal-based TUI file manager",
+      "homepage": "https://github.com/GiorgosXou/TUIFIManager",
+      "license": "MIT",
+      "download_size": "Unknown",
+      "installed_size": "Unknown",
+      "source": "https://github.com/djunekz/termux-app-store",
+      "srcurl": "https://api.github.com/repos/GiorgosXou/TUIFIManager/tarball/v.${TERMUX_PKG_VERSION}",
+      "sha256": "4f323aefd84e35177411445c32ed2d48140b0fd1fec688bbcdee0992841e0f00",
+      "platform_independent": false,
+      "depends": [
+        "python"
+      ]
+    },
+    {
       "package": "tx",
       "version": "1.0.0",
       "maintainer": "@termux-app-store",
@@ -267,6 +346,20 @@
         "python",
         "ncurses"
       ]
+    },
+    {
+      "package": "uv",
+      "version": "0.10.4",
+      "maintainer": "@termux-app-store",
+      "description": "An extremely fast Python package and project manager, written in Rust.",
+      "homepage": "https://github.com/astral-sh/uv",
+      "license": "Apache-2.0",
+      "download_size": "Unknown",
+      "installed_size": "Unknown",
+      "source": "https://github.com/djunekz/termux-app-store",
+      "srcurl": "https://github.com/astral-sh/uv/releases/download/0.10.4/uv-aarch64-unknown-linux-musl.tar.gz",
+      "sha256": "82fc461031dafb130af761e7dbec1bcc51b826c2e664f5bf8bc4e4f8330320cd",
+      "platform_independent": false
     },
     {
       "package": "webshake",
