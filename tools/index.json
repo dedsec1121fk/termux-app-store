@@ -1,8 +1,8 @@
 {
   "version": "1.0",
   "repository": "https://github.com/djunekz/termux-app-store",
-  "generated_at": "2026-02-23T11:31:53.637413+00:00",
-  "total": 23,
+  "generated_at": "2026-02-23T11:35:53.451387+00:00",
+  "total": 22,
   "packages": [
     {
       "package": "aircrack-ng",
@@ -179,20 +179,6 @@
       "source": "https://github.com/djunekz/termux-app-store",
       "srcurl": "https://api.github.com/repos/jaykali/maskphish/tarball/${TERMUX_PKG_VERSION}",
       "sha256": "dbace1301bcc946edfd1cc977f9dc9633e198ad035c9f23c69232388b53ae112",
-      "platform_independent": false
-    },
-    {
-      "package": "metasploit",
-      "version": "2.5.0",
-      "maintainer": "@termux-app-store",
-      "description": "Installer Latest Metasploit In Termux (2026). Features automatic Ruby 3.4+ Nokogiri/Gumbo patches, PostgreSQL auto-fix, and silent installation logic.",
-      "homepage": "https://github.com/h4ck3r0/Metasploit-termux",
-      "license": "GPL-3.0",
-      "download_size": "Unknown",
-      "installed_size": "Unknown",
-      "source": "https://github.com/djunekz/termux-app-store",
-      "srcurl": "https://api.github.com/repos/h4ck3r0/Metasploit-termux/tarball/${TERMUX_PKG_VERSION}",
-      "sha256": "67ef935750a14c1c13b6471d6b9e1b0da69dae8cf4cfee3d1a0512881be37c07",
       "platform_independent": false
     },
     {
