@@ -174,7 +174,8 @@ TERMUX_PKG_SRCURL=""
 TERMUX_PKG_SHA256=""
 ```
 
-> 💡 Lihat template lengkap di folder `template/build.sh`
+> [!NOTE]
+> Lihat template lengkap di folder `template/build.sh`
 > atau jalankan: `./termux-build template`
 
 ---
