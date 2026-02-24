@@ -115,12 +115,6 @@ jobs:
 
           echo "=== Updating CHANGELOG.md (smart merge) ==="
 
-          # Smart merge via Python:
-          # - Temukan [Unreleased] section
-          # - Jika ### Added/Update/Changed sudah ada → append item ke sana
-          # - Jika belum ada → buat section baru
-          # - Tidak pernah duplikasi header
-          # - Tidak pernah duplikasi item package yang sama
           python3 - "$ADDED_FILE" "$UPDATED_FILE" "$META_FILE" << 'PYEOF'
           import sys, re
 
@@ -143,7 +137,6 @@ jobs:
           with open('CHANGELOG.md') as f:
               lines = f.read().split('\n')
 
-          # Cari batas [Unreleased]
           unreleased_start = None
           unreleased_end   = None
           for i, line in enumerate(lines):
@@ -160,7 +153,6 @@ jobs:
           if unreleased_end is None:
               unreleased_end = len(lines)
 
-          # Parse isi [Unreleased]
           inner = lines[unreleased_start + 1 : unreleased_end]
           after = lines[unreleased_end:]
 
@@ -178,7 +170,6 @@ jobs:
               elif current_section and line.strip():
                   sections_data[current_section].append(line)
 
-          # Merge — skip duplikat berdasarkan nama package
           def merge(section_name, new_items):
               if not new_items:
                   return
@@ -199,7 +190,6 @@ jobs:
           merge('Update',  new_updated)
           merge('Changed', new_meta)
 
-          # Rebuild [Unreleased]
           new_inner = ['']
           for sec in sections_order:
               items = sections_data.get(sec, [])

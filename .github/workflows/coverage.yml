@@ -15,7 +15,7 @@ permissions:
 jobs:
   coverage:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -41,19 +41,17 @@ jobs:
         uses: codecov/codecov-action@v5
         with:
           files: coverage.xml
-          fail_ci_if_error: false  # Don't fail on upload errors
+          fail_ci_if_error: false
           verbose: true
-          token: ${{ secrets.CODECOV_TOKEN }}  # Optional for public repos
-        continue-on-error: true  # Don't fail workflow if codecov fails
+          token: ${{ secrets.CODECOV_TOKEN }}
+        continue-on-error: true
 
       - name: Generate coverage badge
         if: github.event_name == 'push' && github.ref == 'refs/heads/master'
         run: |
-          # Generate simple coverage report
           COVERAGE=$(python -c "import xml.etree.ElementTree as ET; tree = ET.parse('coverage.xml'); root = tree.getroot(); print(f\"{float(root.attrib['line-rate'])*100:.1f}\")" 2>/dev/null || echo "0")
           echo "Coverage: ${COVERAGE}%"
-          
-          # Create badge JSON
+
           mkdir -p .github/badges
           cat > .github/badges/coverage.json <<EOF
           {

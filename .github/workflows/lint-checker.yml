@@ -37,8 +37,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
         with:
-          # If PR is merged, checkout the merge commit
-          # If PR is open, checkout the head
           ref: ${{ github.event.pull_request.merged && github.event.pull_request.merge_commit_sha || github.event.pull_request.head.sha }}
           fetch-depth: 0
 
@@ -48,10 +46,9 @@ jobs:
         run: |
           BASE_SHA="${{ github.event.pull_request.base.sha }}"
           HEAD_SHA="${{ github.event.pull_request.head.sha }}"
-          
+
           echo "Comparing: $BASE_SHA...$HEAD_SHA"
-          
-          # Get changed files
+
           FILES=$(git diff --name-only "$BASE_SHA" "$HEAD_SHA" | grep 'packages/.*/build.sh' || true)
 
           {
@@ -63,8 +60,7 @@ jobs:
           echo "Changed files:"
           echo "$FILES"
           echo ""
-          
-          # Verify files exist
+
           if [ -n "$FILES" ]; then
             echo "Verifying file existence:"
             while read -r file; do
@@ -86,10 +82,9 @@ jobs:
 
           while read -r file; do
             [ -z "$file" ] && continue
-            
+
             echo "🧹 Checking syntax: $file"
-            
-            # Check if file exists
+
             if [ ! -f "$file" ]; then
               echo "❌ File not found: $file"
               ERROR=1
@@ -98,11 +93,9 @@ jobs:
               LINT_DETAILS="${LINT_DETAILS}This may indicate the file was deleted or the checkout failed.\n\n"
               continue
             fi
-            
-            # Normalize line endings
+
             sed -i 's/\r$//' "$file"
-            
-            # Check bash syntax
+
             if ! bash -n "$file" 2>&1 | tee /tmp/lint_error.txt; then
               echo "❌ Syntax error in $file"
               ERROR=1
@@ -124,7 +117,7 @@ jobs:
         id: validate
         shell: bash
         run: |
-          set +e  # Don't exit on error - we'll handle errors manually
+          set +e
           VALIDATION_ERROR=0
           VALIDATION_DETAILS=""
           CURL_TIMEOUT=30
@@ -133,8 +126,7 @@ jobs:
             [ -z "$file" ] && continue
 
             echo "🔍 Validating content: $file"
-            
-            # Check if file exists
+
             if [ ! -f "$file" ]; then
               echo "❌ File not found: $file (skipping validation)"
               VALIDATION_ERROR=1
@@ -143,12 +135,10 @@ jobs:
               VALIDATION_DETAILS="${VALIDATION_DETAILS}---\n\n"
               continue
             fi
-            
-            # Extract package name safely
+
             PKG_DIR=$(dirname "$file" 2>/dev/null || echo "unknown")
             PKG_NAME=$(basename "$PKG_DIR" 2>/dev/null || echo "unknown")
 
-            # Extract variables safely with error handling
             get_var() {
               local var_name="$1"
               local result
@@ -171,8 +161,6 @@ jobs:
 
             VALIDATION_DETAILS="${VALIDATION_DETAILS}## 📦 Package: \`$PKG_NAME\`\n\n"
 
-            # Required field validations (ONLY VERSION, SRCURL, SHA256)
-            # Note: TERMUX_PKG_NAME is NOT required - package name from folder
             MISSING_REQUIRED=false
 
             if [ -z "$VERSION" ]; then
@@ -196,13 +184,11 @@ jobs:
               MISSING_REQUIRED=true
             fi
 
-            # Skip further checks if required fields are missing
             if [ "$MISSING_REQUIRED" = true ]; then
               VALIDATION_DETAILS="${VALIDATION_DETAILS}\n---\n\n"
               continue
             fi
 
-            # SHA256 format validation
             if ! [[ "$SHA256" =~ ^[a-fA-F0-9]{64}$ ]]; then
               echo "❌ Invalid SHA256 format"
               VALIDATION_ERROR=1
@@ -210,7 +196,6 @@ jobs:
               VALIDATION_DETAILS="${VALIDATION_DETAILS}  Got: \`$SHA256\`\n"
             fi
 
-            # URL format validation
             if ! [[ "$SRCURL" =~ ^https?:// ]]; then
               echo "❌ Invalid SRCURL format"
               VALIDATION_ERROR=1
@@ -220,12 +205,10 @@ jobs:
               continue
             fi
 
-            # Expand ${TERMUX_PKG_VERSION} in SRCURL
             DOWNLOAD_URL="$SRCURL"
             DOWNLOAD_URL="${DOWNLOAD_URL//\$\{TERMUX_PKG_VERSION\}/$VERSION}"
             DOWNLOAD_URL="${DOWNLOAD_URL//\$TERMUX_PKG_VERSION/$VERSION}"
 
-            # Check for malformed syntax
             if [[ "$DOWNLOAD_URL" =~ \}\} ]] || [[ "$DOWNLOAD_URL" =~ \}\$ ]] || [[ "$DOWNLOAD_URL" =~ [^{]\}[^}] ]]; then
               echo "❌ Malformed SRCURL syntax"
               VALIDATION_ERROR=1
@@ -238,7 +221,6 @@ jobs:
 
             echo "   Final URL: ${DOWNLOAD_URL:0:70}..."
 
-            # Download and verify SHA256
             if timeout $CURL_TIMEOUT curl -fsSL -o /tmp/source_file "$DOWNLOAD_URL" 2>/dev/null; then
               COMPUTED_SHA256=$(sha256sum /tmp/source_file 2>/dev/null | awk '{print $1}')
               FILE_SIZE=$(ls -lh /tmp/source_file 2>/dev/null | awk '{print $5}')
@@ -266,7 +248,6 @@ jobs:
               VALIDATION_DETAILS="${VALIDATION_DETAILS}  - HTTP Status: \`$HTTP_CODE\`\n"
             fi
 
-            # Optional field warnings
             [ -z "$LICENSE" ] && VALIDATION_DETAILS="${VALIDATION_DETAILS}- ⚠️  TERMUX_PKG_LICENSE not defined (recommended)\n"
             [ -z "$HOMEPAGE" ] && VALIDATION_DETAILS="${VALIDATION_DETAILS}- ⚠️  TERMUX_PKG_HOMEPAGE not defined (recommended)\n"
             [ -z "$DESCRIPTION" ] && VALIDATION_DETAILS="${VALIDATION_DETAILS}- ⚠️  TERMUX_PKG_DESCRIPTION not defined (recommended)\n"
@@ -276,14 +257,13 @@ jobs:
 
           done <<< "${{ steps.files.outputs.changed_files }}"
 
-          # Final status output
           {
             echo "validation_status=$VALIDATION_ERROR"
             echo "validation_details<<EOF"
             echo -e "$VALIDATION_DETAILS"
             echo "EOF"
           } >> "$GITHUB_OUTPUT"
-          
+
           echo ""
           echo "Validation completed with status: $VALIDATION_ERROR"
 
@@ -390,7 +370,7 @@ jobs:
             **Label `checker-approved` has been added automatically.**
 
             This will trigger the package review workflow for detailed inspection.
-            
+
             Thank you for your contribution! 🎉
 
       - name: Fail workflow if validation failed
