@@ -1221,6 +1221,19 @@ _section "Installing Package"
 _progress "Running dpkg -i..."
 dpkg -i "$DEB_FILE"
 
+# ── HOLD PACKAGE: protect from pkg upgrade overwrite ──────────────────────────
+if apt-mark hold "$PACKAGE" > /dev/null 2>&1; then
+  _ok "Package held — protected from 'pkg upgrade' overwrite"
+else
+  _warn "Could not hold package — may be overwritten by 'pkg upgrade'"
+fi
+
+# ── WARN jika package juga ada di official Termux repo ────────────────────────
+if apt-cache show "$PACKAGE" > /dev/null 2>&1; then
+  _warn "Package '$PACKAGE' also exists in official Termux repo"
+  _detail "Note:" "Package is held — official version will be skipped on upgrade"
+fi
+
 # =============================================
 #  POST-INSTALL VALIDATION
 # =============================================
