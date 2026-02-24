@@ -52,7 +52,6 @@ chmod +x "$TARGET/build.sh"
 ok "Package created:"
 echo -e "  ${BOLD_YELLOW}→ packages/$PKG/build.sh${RESET}"
 
-# ---------- Steps ----------
 echo
 echo -e "${BOLD_CYAN}=============================================${RESET}"
 echo -e "${BOLD_CYAN}Next steps:${RESET}"

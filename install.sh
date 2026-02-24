@@ -1,10 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/bash
 set -Eeuo pipefail
 
-# =========================================================
-# Termux App Store — Installer (FIXED VERSION)
-# =========================================================
-
 APP_NAME="termux-app-store"
 REPO="djunekz/termux-app-store"
 VERSION="latest"
@@ -12,7 +8,6 @@ INSTALL_DIR="$PREFIX/lib/.tas"
 BIN_DIR="$PREFIX/bin"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Colors
 R='\033[0m'
 B='\033[1m'
 RED='\033[31m'
@@ -20,11 +15,6 @@ GREEN='\033[32m'
 YELLOW='\033[33m'
 CYAN='\033[36m'
 DIM='\033[2m'
-
-
-# ──────────────────────────────────────────────
-# UTILS
-# ──────────────────────────────────────────────
 
 die()  { echo -e "${RED}[✗] $*${R}" >&2; exit 1; }
 info() { echo -e "${CYAN}[*] $*${R}"; }
@@ -35,9 +25,6 @@ strip_ansi() {
   echo "$1" | sed 's/\x1b\[[0-9;]*[mGKHf]//g'
 }
 
-# ──────────────────────────────────────────────
-# PRE-CHECKS
-# ──────────────────────────────────────────────
 export TERMUX_APP_STORE_MODE=local
 export TERMUX_APP_STORE_HOME=$(pwd)
 check_termux() {
@@ -56,10 +43,6 @@ install_dep() {
   fi
 }
 
-# ──────────────────────────────────────────────
-# ARCH DETECTION
-# ──────────────────────────────────────────────
-
 detect_arch() {
   local arch; arch="$(uname -m)"
   case "$arch" in
@@ -72,12 +55,7 @@ detect_arch() {
   ok "Architecture: ${B}$arch${R}"
 }
 
-# ──────────────────────────────────────────────
-# INSTALL MODE DETECTION
-# ──────────────────────────────────────────────
-
 detect_mode() {
-  # Cek apakah dijalankan dari dalam repo (ada source files)
   if [[ -f "$SCRIPT_DIR/termux_app_store_cli.py" ]] && \
      [[ -f "$SCRIPT_DIR/termux_app_store.py" ]]    && \
      [[ -f "$SCRIPT_DIR/tools/package_manager.py" ]]; then
@@ -89,55 +67,40 @@ detect_mode() {
   fi
 }
 
-# ──────────────────────────────────────────────
-# VERSION DETECTION (IMPROVED)
-# ──────────────────────────────────────────────
-
 detect_version() {
   local ver=""
-  
-  # Try multiple methods to extract version
+
   for f in "$INSTALL_DIR/termux_app_store_cli.py" "$INSTALL_DIR/termux_app_store.py" \
            "$SCRIPT_DIR/termux_app_store_cli.py" "$SCRIPT_DIR/termux_app_store.py"; do
     if [[ -f "$f" ]]; then
-      # Method 1: grep with Perl regex
       ver=$(grep -oP 'APP_VERSION\s*=\s*"\K[0-9.]+' "$f" 2>/dev/null | head -1 || echo "")
-      
-      # Method 2: awk (more reliable)
+
       if [[ -z "$ver" ]]; then
         ver=$(awk -F'"' '/APP_VERSION.*=/{print $2; exit}' "$f" 2>/dev/null || echo "")
       fi
-      
-      # Method 3: sed fallback
+
       if [[ -z "$ver" ]]; then
         ver=$(sed -n 's/.*APP_VERSION.*=.*"\([0-9.]*\)".*/\1/p' "$f" 2>/dev/null | head -1 || echo "")
       fi
-      
-      # If we got a version, break
+
       if [[ -n "$ver" ]] && [[ "$ver" != "unknown" ]]; then
         break
       fi
     fi
   done
-  
-  # Fallback to default version
+
   if [[ -z "$ver" ]] || [[ "$ver" == "unknown" ]]; then
     ver="0.1.4"
   fi
-  
+
   echo "$ver"
 }
-
-# ──────────────────────────────────────────────
-# EXISTING INSTALLATION CHECK
-# ──────────────────────────────────────────────
 
 check_existing() {
   [[ -f "$BIN_DIR/$APP_NAME" ]] || return 0
 
   warn "Existing installation found"
 
-  # Detect version using improved method
   local current
   current=$(detect_version)
 
@@ -150,58 +113,41 @@ check_existing() {
   esac
 }
 
-# ──────────────────────────────────────────────
-# CLEANUP
-# ──────────────────────────────────────────────
-
 cleanup() {
   info "Cleaning up old installation..."
   rm -rf  "$INSTALL_DIR"
   rm -f   "$BIN_DIR/$APP_NAME"
 }
 
-# ──────────────────────────────────────────────
-# SOURCE INSTALLATION
-# ──────────────────────────────────────────────
-
 install_source() {
-  # Python check
   if ! command -v python3 >/dev/null 2>&1; then
     info "Installing Python3..."
     pkg install -y python || die "Failed to install Python3"
   fi
   ok "Python: $(python3 --version 2>&1 | awk '{print $2}')"
 
-  # Textual check
   if ! python3 -c "import textual" >/dev/null 2>&1; then
     info "Installing Textual..."
     pip install textual --break-system-packages || die "Failed to install Textual"
   fi
   ok "Textual: v$(python3 -c "import textual; print(textual.__version__)" 2>/dev/null)"
 
-  # Copy files
   info "Copying files to $INSTALL_DIR ..."
   mkdir -p "$INSTALL_DIR"
   cp "$SCRIPT_DIR/termux_app_store_cli.py"  "$INSTALL_DIR/"
   cp "$SCRIPT_DIR/termux_app_store.py"       "$INSTALL_DIR/"
 
-  # Copy packages/ jika ada
   if [[ -d "$SCRIPT_DIR/packages" ]]; then
     cp -r "$SCRIPT_DIR/packages" "$INSTALL_DIR/"
     ok "Packages directory copied (local build mode enabled)"
   fi
 
-  # Copy build-package.sh jika ada
   if [[ -f "$SCRIPT_DIR/build-package.sh" ]]; then
     cp "$SCRIPT_DIR/build-package.sh" "$INSTALL_DIR/"
   fi
 
   ok "Files copied"
 }
-
-# ──────────────────────────────────────────────
-# BINARY INSTALLATION
-# ──────────────────────────────────────────────
 
 install_binary() {
   install_dep "curl"
@@ -215,7 +161,6 @@ install_binary() {
 
   info "Downloading ${B}$bin_name${R}..."
 
-  # Download dengan progress bar
   curl -fL --progress-bar --retry 3 --retry-delay 2 "$url" -o "$target" 2>&1 || {
     warn "Binary download failed, falling back to source install"
     INSTALL_MODE="source"
@@ -223,21 +168,16 @@ install_binary() {
     return
   }
 
-  # Validate ELF
   file "$target" | grep -q ELF || die "Downloaded file is not a valid ELF binary"
 
   chmod +x "$target"
   ok "Binary downloaded and validated"
 }
 
-# ──────────────────────────────────────────────
-# CREATE WRAPPER SCRIPT
-# ──────────────────────────────────────────────
 
 create_wrapper() {
   info "Creating wrapper script..."
 
-  # Tentukan script yang akan dijalankan sesuai mode
   if [[ "$INSTALL_MODE" == "source" ]]; then
     CLI_SCRIPT="$INSTALL_DIR/termux_app_store_cli.py"
     TUI_SCRIPT="$INSTALL_DIR/termux_app_store.py"
@@ -246,11 +186,9 @@ create_wrapper() {
     TUI_SCRIPT="$INSTALL_DIR/$APP_NAME.bin"
   fi
 
-  # Get version for environment variable
   local ver
   ver=$(detect_version)
 
-  # Buat wrapper utama
   cat > "$BIN_DIR/$APP_NAME" << 'EOF'
 #!/data/data/com.termux/files/usr/bin/bash
 # termux-app-store — auto-generated wrapper
@@ -258,13 +196,11 @@ create_wrapper() {
 
 EOF
 
-  # Add version export
   echo "export TERMUX_APP_STORE_VERSION=\"$ver\"" >> "$BIN_DIR/$APP_NAME"
   echo "export TERMUX_APP_STORE_HOME=\"$INSTALL_DIR\"" >> "$BIN_DIR/$APP_NAME"
   echo "" >> "$BIN_DIR/$APP_NAME"
 
   if [[ "$INSTALL_MODE" == "source" ]]; then
-    # Source mode: jalankan Python
     cat >> "$BIN_DIR/$APP_NAME" << EOF
 if [ \$# -eq 0 ]; then
     exec python3 "$TUI_SCRIPT"
@@ -273,17 +209,12 @@ else
 fi
 EOF
   else
-    # Binary mode: jalankan binary
     echo "exec \"$CLI_SCRIPT\" \"\$@\"" >> "$BIN_DIR/$APP_NAME"
   fi
 
   chmod +x "$BIN_DIR/$APP_NAME"
   ok "Wrapper created: $BIN_DIR/$APP_NAME"
 }
-
-# ──────────────────────────────────────────────
-# COMPLETION MESSAGE
-# ──────────────────────────────────────────────
 
 show_done() {
   local ver
@@ -308,10 +239,6 @@ show_done() {
   echo -e "  ${B}$APP_NAME version${R}         ${DIM}→ Show version${R}"
   echo ""
 }
-
-# ──────────────────────────────────────────────
-# MAIN
-# ──────────────────────────────────────────────
 
 main() {
   echo ""

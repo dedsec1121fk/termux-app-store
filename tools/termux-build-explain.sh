@@ -5,7 +5,6 @@ set -eo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 COLORS_FILE="$ROOT/tools/colors.sh"
 
-# Load colors if available
 if [[ -f "$COLORS_FILE" ]]; then
   source "$COLORS_FILE"
 else
@@ -30,7 +29,6 @@ if [[ ! -f "$FILE" ]]; then
   exit 1
 fi
 
-# IMPORTANT: source in current shell (NOT subshell)
 set +u +e
 source "$FILE" >/dev/null 2>&1 || true
 
@@ -65,9 +63,6 @@ info() {
   echo -e "${CYAN}ℹ INFO  : $msg${RESET}"
 }
 
-# =========================
-# Core Required Fields
-# =========================
 check_field "TERMUX_PKG_SRCURL"  "${TERMUX_PKG_SRCURL:-}" \
   "Set a valid download URL (GitHub release, tar.gz, binary, etc)"
 
@@ -80,9 +75,6 @@ check_field "TERMUX_PKG_VERSION" "${TERMUX_PKG_VERSION:-}" \
 check_field "TERMUX_PKG_LICENSE" "${TERMUX_PKG_LICENSE:-}" \
   "Example: MIT, Apache-2.0, GPL-3.0"
 
-# =========================
-# Recommended Fields
-# =========================
 if [[ -n "${TERMUX_PKG_HOMEPAGE:-}" ]]; then
   echo -e "${BOLD_GREEN}✔ TERMUX_PKG_HOMEPAGE:${RESET} $TERMUX_PKG_HOMEPAGE"
 else
@@ -100,25 +92,18 @@ else
   RISK=1
 fi
 
-# =========================
-# Smart Validations
-# =========================
-
-# SHA256 format check
 if [[ -n "${TERMUX_PKG_SHA256:-}" ]]; then
   if [[ ! "${TERMUX_PKG_SHA256}" =~ ^[a-fA-F0-9]{64}$ ]]; then
     warn "SHA256 format looks invalid (must be 64 hex characters)"
   fi
 fi
 
-# SRCURL format check
 if [[ -n "${TERMUX_PKG_SRCURL:-}" ]]; then
   if [[ ! "${TERMUX_PKG_SRCURL}" =~ ^https?:// ]]; then
     warn "SRCURL is not a valid HTTP/HTTPS URL"
   fi
 fi
 
-# Detect binary vs source archive (important for PyInstaller apps like tx)
 if [[ -n "${TERMUX_PKG_SRCURL:-}" ]]; then
   if [[ "${TERMUX_PKG_SRCURL}" =~ \.(tar\.gz|tar\.xz|zip|tgz)$ ]]; then
     info "Source type detected: Archive package"
@@ -127,9 +112,6 @@ if [[ -n "${TERMUX_PKG_SRCURL:-}" ]]; then
   fi
 fi
 
-# =========================
-# Remote File Analysis (Advanced Feature)
-# =========================
 if command -v curl >/dev/null 2>&1 && [[ -n "${TERMUX_PKG_SRCURL:-}" ]]; then
   echo
   echo -e "${CYAN}🌐 Remote Source Analysis${RESET}"
@@ -145,14 +127,12 @@ if command -v curl >/dev/null 2>&1 && [[ -n "${TERMUX_PKG_SRCURL:-}" ]]; then
     RISK=1
   fi
 
-  # Try to get file size
   FILE_SIZE=$(curl -sIL "$TERMUX_PKG_SRCURL" | grep -i content-length | tail -n1 | awk '{print $2}' | tr -d '\r')
 
   if [[ -n "$FILE_SIZE" && "$FILE_SIZE" =~ ^[0-9]+$ ]]; then
     SIZE_MB=$(awk "BEGIN {printf \"%.2f\", $FILE_SIZE/1024/1024}")
     echo -e "${BOLD_GREEN}✔ Remote File Size:${RESET} ${SIZE_MB} MB (${FILE_SIZE} bytes)"
 
-    # Smart size warnings
     if (( FILE_SIZE > 50000000 )); then
       warn "Very large package (>50MB). May be heavy for Termux users."
     elif (( FILE_SIZE > 15000000 )); then
@@ -163,9 +143,6 @@ if command -v curl >/dev/null 2>&1 && [[ -n "${TERMUX_PKG_SRCURL:-}" ]]; then
   fi
 fi
 
-# =========================
-# Dependency Insight
-# =========================
 if [[ -n "${TERMUX_PKG_DEPENDS:-}" ]]; then
   echo
   echo -e "${CYAN}📦 Dependency Insight${RESET}"
@@ -176,9 +153,6 @@ if [[ -n "${TERMUX_PKG_DEPENDS:-}" ]]; then
   fi
 fi
 
-# =========================
-# Final Risk Assessment
-# =========================
 echo
 if [[ $RISK -eq 1 ]]; then
   echo -e "${BOLD_RED}🚫 High risk: PR likely to be rejected${RESET}"

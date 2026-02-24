@@ -58,4 +58,4 @@ if FAILED:
     print("\n❌ One or more packages failed validation")
     sys.exit(1)
 
-print("\n🎉 All packages validated successfully")
+print("\n✅ All packages validated successfully")

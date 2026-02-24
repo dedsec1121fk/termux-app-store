@@ -31,7 +31,6 @@ if [[ ! -f "$FILE" ]]; then
   exit 1
 fi
 
-# Load variables safely (avoid script execution side effects)
 set +e
 source "$FILE"
 set -e
@@ -58,7 +57,6 @@ suggest_quality() {
   fi
 }
 
-# Required fields
 suggest_missing TERMUX_PKG_HOMEPAGE
 suggest_missing TERMUX_PKG_DESCRIPTION
 suggest_missing TERMUX_PKG_LICENSE
@@ -67,7 +65,6 @@ suggest_missing TERMUX_PKG_VERSION
 suggest_missing TERMUX_PKG_SRCURL
 suggest_missing TERMUX_PKG_SHA256
 
-# Quality hints
 suggest_quality TERMUX_PKG_DESCRIPTION
 suggest_quality TERMUX_PKG_HOMEPAGE
 

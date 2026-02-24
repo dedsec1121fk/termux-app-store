@@ -4,7 +4,6 @@ set -Eeuo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 COLORS_FILE="$SCRIPT_DIR/colors.sh"
 if [[ -f "$COLORS_FILE" ]]; then
-  # shellcheck disable=SC1090
   source "$COLORS_FILE"
 else
   BOLD_RED=""
@@ -32,7 +31,6 @@ echo -e "${CYAN}=================================================${RESET}"
 
 FAIL=0
 
-# ---------- helper ----------
 check_var() {
     local var="$1"
     if ! grep -Eq "^${var}=" "$FILE"; then
@@ -43,7 +41,6 @@ check_var() {
     fi
 }
 
-# ---------- REQUIRED FIELDS ----------
 check_var "TERMUX_PKG_HOMEPAGE"
 check_var "TERMUX_PKG_DESCRIPTION"
 check_var "TERMUX_PKG_LICENSE"
@@ -52,7 +49,6 @@ check_var "TERMUX_PKG_VERSION"
 check_var "TERMUX_PKG_SRCURL"
 check_var "TERMUX_PKG_SHA256"
 
-# ---------- BASIC SANITY ----------
 if grep -q "dpkg -i" "$FILE"; then
     echo -e "${BOLD_YELLOW}⚠️  WARN :${RESET} build.sh contains 'dpkg -i' (not allowed in Termux build)"
 fi
@@ -66,11 +62,9 @@ if grep -q "apt install" "$FILE"; then
     echo -e "${BOLD_YELLOW}⚠️  WARN :${RESET} apt install found (use pkg install instead)"
 fi
 
-# ---------- SOURCE SHA256 CHECK ----------
 
 _load_pkg_vars() {
     set +u
-    # shellcheck disable=SC1090
     source "$FILE"
     set -u
 
@@ -137,7 +131,6 @@ if [[ -n "$SRCURL" && -n "$EXPECTED_SHA" ]]; then
     fi
 fi
 
-# ---------- RESULT ----------
 echo -e "${CYAN}-------------------------------------------------${RESET}"
 if [[ "$FAIL" -eq 1 ]]; then
     echo -e "${BOLD_RED}❌ VALIDATION FAILED${RESET}"

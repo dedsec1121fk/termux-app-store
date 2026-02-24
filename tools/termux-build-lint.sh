@@ -25,7 +25,6 @@ if [[ -z "$TARGET" ]]; then
     exit 2
 fi
 
-# ---------- Lint All ----------
 if [[ "$TARGET" == "all" ]]; then
     FAIL=0
     FOUND=0
@@ -48,12 +47,10 @@ if [[ "$TARGET" == "all" ]]; then
     exit $FAIL
 fi
 
-# ---------- Lint by package name ----------
 if [[ -d "$PKG_DIR/$TARGET" ]]; then
     exec bash "$VALIDATOR" "$PKG_DIR/$TARGET/build.sh"
 fi
 
-# ---------- Lint by direct path ----------
 if [[ -f "$TARGET" ]]; then
     exec bash "$VALIDATOR" "$TARGET"
 fi

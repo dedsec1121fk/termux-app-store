@@ -6,9 +6,6 @@
 
 set -euo pipefail
 
-# =============================================
-#  COLORS
-# =============================================
 R="\033[0m"
 BOLD="\033[1m"
 DIM="\033[2m"
@@ -25,9 +22,6 @@ BG_GREEN="\033[42m"
 BG_RED="\033[41m"
 BLACK="\033[30m"
 
-# =============================================
-#  LINE HELPERS  (warna seragam: GRAY)
-# =============================================
 _width() {
   local w; w=$(tput cols 2>/dev/null)
   [[ "$w" =~ ^[0-9]+$ ]] && echo "$w" || echo 60
@@ -47,9 +41,6 @@ _line_thin() {
   printf "${R}\n"
 }
 
-# =============================================
-#  OUTPUT HELPERS
-# =============================================
 _banner() {
   local w; w=$(_width)
   echo ""
@@ -80,9 +71,6 @@ _fatal()    { printf "\n  ${BG_RED}${BLACK}${BOLD} FATAL ${R}  ${BRED}${BOLD}%s$
 _detail()   { printf "      ${GRAY}%-14s${R}  ${WHITE}%s${R}\n" "$1" "$2"; }
 _badge()    { printf "  ${GRAY}%-12s${R}  ${BOLD}${WHITE}%s${R}\n" "$1" "$2"; }
 
-# =============================================
-#  ARGS & PATHS
-# =============================================
 PACKAGE="${1:-}"
 ROOT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PACKAGES_DIR="$ROOT_DIR/packages"
@@ -106,12 +94,8 @@ if [[ ! -f "$BUILD_SH" ]]; then
   exit 1
 fi
 
-# =============================================
-#  SYNTAX CHECK build.sh SEBELUM SOURCE
-# =============================================
 _section "Validating build.sh"
 
-# Cek apakah file kosong / hanya whitespace
 if [[ ! -s "$BUILD_SH" ]] || ! grep -qE '[^[:space:]]' "$BUILD_SH"; then
   _fatal "build.sh is empty"
   echo ""
@@ -130,12 +114,10 @@ if [[ ! -s "$BUILD_SH" ]] || ! grep -qE '[^[:space:]]' "$BUILD_SH"; then
   exit 1
 fi
 
-# Syntax check via bash -n
 _SYNTAX_ERR=$(bash -n "$BUILD_SH" 2>&1)
 if [[ $? -ne 0 ]] || [[ -n "$_SYNTAX_ERR" ]]; then
   _fatal "Syntax error in build.sh"
   echo ""
-  # Parse baris error
   _ERR_LINE=$(echo "$_SYNTAX_ERR" | grep -oP '(?<=line )\d+' | head -1)
   _ERR_MSG=$(echo "$_SYNTAX_ERR" | sed "s|$BUILD_SH: ||g")
   printf "  ${BRED}╭─ Syntax Error${R}\n"
@@ -170,22 +152,16 @@ fi
 
 _ok "Syntax OK"
 
-# Source build.sh
 source "$BUILD_SH"
 
-# =============================================
-#  FIELD VALIDATION (setelah source)
-# =============================================
 _FIELD_ERRORS=()
 _FIELD_WARNS=()
 
-# Field wajib
 [[ -z "${TERMUX_PKG_HOMEPAGE:-}"    ]] && _FIELD_ERRORS+=("TERMUX_PKG_HOMEPAGE   │  (empty)  — URL homepage paket")
 [[ -z "${TERMUX_PKG_DESCRIPTION:-}" ]] && _FIELD_ERRORS+=("TERMUX_PKG_DESCRIPTION│  (empty)  — Deskripsi singkat paket")
 [[ -z "${TERMUX_PKG_LICENSE:-}"     ]] && _FIELD_ERRORS+=("TERMUX_PKG_LICENSE    │  (empty)  — Lisensi (MIT, GPL-3.0, dll)")
 [[ -z "${TERMUX_PKG_VERSION:-}"     ]] && _FIELD_ERRORS+=("TERMUX_PKG_VERSION    │  (empty)  — Versi paket (harus mulai angka)")
 
-# Field opsional tapi disarankan
 [[ -z "${TERMUX_PKG_MAINTAINER:-}"  ]] && _FIELD_WARNS+=("TERMUX_PKG_MAINTAINER │  (empty)  — Nama/handle maintainer")
 
 if [[ ${#_FIELD_ERRORS[@]} -gt 0 ]] || [[ ${#_FIELD_WARNS[@]} -gt 0 ]]; then
@@ -225,7 +201,6 @@ if [[ ${#_FIELD_ERRORS[@]} -gt 0 ]] || [[ ${#_FIELD_WARNS[@]} -gt 0 ]]; then
     echo ""
     exit 1
   else
-    # Hanya warnings
     printf "  ${BYELLOW}╭─ Field Warnings${R}\n"
     printf "  ${BYELLOW}│${R}\n"
     for _fw in "${_FIELD_WARNS[@]}"; do
@@ -241,15 +216,10 @@ fi
 
 _ok "Fields validated"
 
-# =============================================
-#  VALIDATION & SANITIZATION
-# =============================================
-# Ensure TERMUX_PKG_NAME is set (fallback ke PACKAGE jika tidak ada di build.sh)
 if [[ -z "${TERMUX_PKG_NAME:-}" ]]; then
   TERMUX_PKG_NAME="$PACKAGE"
 fi
 
-# Sanitize package name: underscore → hyphen (Debian policy)
 PKG_NAME_ORIGINAL="$TERMUX_PKG_NAME"
 PKG_NAME_SANITIZED=$(echo "$PKG_NAME_ORIGINAL" | tr '_' '-')
 
@@ -257,14 +227,10 @@ if [[ "$PKG_NAME_ORIGINAL" != "$PKG_NAME_SANITIZED" ]]; then
   TERMUX_PKG_NAME="$PKG_NAME_SANITIZED"
 fi
 
-# Set PKG_NAME untuk konsistensi (dipakai di bin/, lib/, wrapper script)
 PKG_NAME="$PKG_NAME_SANITIZED"
 
-# IMPORTANT: Update semua referensi $PACKAGE yang dipakai untuk nama binary/path
-# agar konsisten dengan nama paket Debian yang sudah di-sanitize
-PACKAGE="$PKG_NAME"  # Override PACKAGE dengan nama sanitized
+PACKAGE="$PKG_NAME"
 
-# Validate package name (lowercase alphanumeric + hyphen/plus/dot only)
 if ! [[ "$PKG_NAME_SANITIZED" =~ ^[a-z0-9+.-]+$ ]]; then
   echo ""
   _fatal "Invalid package name format"
@@ -292,7 +258,6 @@ if ! [[ "$PKG_NAME_SANITIZED" =~ ^[a-z0-9+.-]+$ ]]; then
   exit 1
 fi
 
-# Validate version format (must start with digit)
 if [[ -n "${TERMUX_PKG_VERSION:-}" ]]; then
   if ! [[ "$TERMUX_PKG_VERSION" =~ ^[0-9] ]]; then
     echo ""
@@ -322,9 +287,6 @@ if [[ -n "${TERMUX_PKG_VERSION:-}" ]]; then
   fi
 fi
 
-# =============================================
-#  ARCH
-# =============================================
 _section "System & Architecture"
 
 case "$(uname -m)" in
@@ -343,9 +305,6 @@ _badge "  Version :" "${TERMUX_PKG_VERSION:-unknown}"
 _badge "  Arch    :" "$ARCH"
 _badge "  Prefix  :" "$PREFIX"
 
-# =============================================
-#  DEPS
-# =============================================
 _section "Dependencies"
 
 if [[ -n "${TERMUX_PKG_DEPENDS:-}" ]]; then
@@ -356,7 +315,6 @@ if [[ -n "${TERMUX_PKG_DEPENDS:-}" ]]; then
     printf "      ${GRAY}+${R} ${WHITE}%s${R}\n" "$dep"
   done
 
-  # Spinner saat pkg install
   _spin_chars='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
   _spin_i=0
   _PKG_LOG=$(mktemp)
@@ -378,18 +336,13 @@ else
 fi
 
 
-# =============================================
-#  RUST VERSION CHECK (jika paket butuh rust)
-# =============================================
 _check_rust_env() {
-  # Apakah paket ini butuh rust?
   local needs_rust=0
   echo "${TERMUX_PKG_DEPENDS:-}" | grep -qi "rust" && needs_rust=1
   declare -f termux_step_make > /dev/null 2>&1 && command -v cargo &>/dev/null && needs_rust=1
 
   [[ "$needs_rust" -eq 0 ]] && return 0
 
-  # Rust terinstall?
   if ! command -v rustc &>/dev/null || ! command -v cargo &>/dev/null; then
     _skip "Rust/Cargo not found, skipping rust check"
     return 0
@@ -404,13 +357,11 @@ _check_rust_env() {
   _detail "rustc version:" "$rustc_ver"
   _detail "cargo version:" "$cargo_ver"
 
-  # Cek 1: rustc vs cargo harus versi sama
   if [[ "$rustc_ver" != "$cargo_ver" ]]; then
     _warn "rustc ($rustc_ver) dan cargo ($cargo_ver) versi berbeda"
     mismatch=1
   fi
 
-  # Cek 2: Compile dummy — deteksi E0514 stale cache paling akurat
   local _tmpdir; _tmpdir=$(mktemp -d)
   printf 'fn main() {}\n' > "$_tmpdir/check.rs"
   if ! (rustc "$_tmpdir/check.rs" -o "$_tmpdir/check_bin" 2>/dev/null); then
@@ -419,13 +370,11 @@ _check_rust_env() {
   fi
   rm -rf "$_tmpdir"
 
-  # Auto-fix jika ada masalah
   if [[ "$mismatch" -eq 1 ]]; then
     echo ""
     printf "  ${BYELLOW}[  !!  ]${R}  ${BOLD}Rust mismatch terdeteksi — update & bersihkan otomatis...${R}\n"
     echo ""
 
-    # Step 1: Update rust ke versi terbaru via pkg
     _progress "Mengupdate rust (pkg upgrade rust)..."
     if pkg upgrade -y rust 2>&1 | grep -v "^$"; then
       _ok "Rust diupdate"
@@ -433,17 +382,14 @@ _check_rust_env() {
       _warn "pkg upgrade rust gagal, melanjutkan dengan versi saat ini"
     fi
 
-    # Step 2: Bersihkan registry/src cache (akan re-download saat build)
     if [[ -d "$HOME/.cargo/registry/src" ]]; then
       _progress "Menghapus registry/src cache yang stale..."
       rm -rf "$HOME/.cargo/registry/src/"
       _ok "registry/src dibersihkan"
     fi
 
-    # Step 3: Hapus package cache index
     rm -f "$HOME/.cargo/.package-cache" 2>/dev/null || true
 
-    # Step 4: cargo clean sisa build sebelumnya
     if [[ -d "$ROOT_DIR/build/$PACKAGE" ]]; then
       find "$ROOT_DIR/build/$PACKAGE" -name "Cargo.toml" -maxdepth 3 2>/dev/null \
         | while read -r _ct; do
@@ -455,12 +401,10 @@ _check_rust_env() {
       done
     fi
 
-    # Verifikasi ulang setelah fix
     local rustc_ver_new
     rustc_ver_new=$(rustc --version 2>/dev/null | awk '{print $2}' || echo "unknown")
     _ok "Rust environment bersih (rustc $rustc_ver_new)"
 
-    # Restart script dari awal dengan argumen yang sama
     echo ""
     printf "  ${BCYAN}[  >>  ]${R}  ${BOLD}Restarting build...${R}\n"
     echo ""
@@ -472,9 +416,6 @@ _check_rust_env() {
 
 _check_rust_env
 
-# =============================================
-#  DIRS
-# =============================================
 _section "Preparing Build Environment"
 
 _progress "Cleaning previous build..."
@@ -485,9 +426,6 @@ _ok "Build environment ready"
 _detail "Work dir:"   "$WORK_DIR"
 _detail "Output dir:" "$DEB_DIR"
 
-# =============================================
-#  DOWNLOAD (opsional — skip jika tidak ada SRCURL)
-# =============================================
 SRC_FILE="$WORK_DIR/source"
 PREBUILT_DEB=""
 PREBUILT_BIN=""
@@ -499,7 +437,6 @@ if [[ -n "${TERMUX_PKG_SRCURL:-}" ]]; then
   _progress "Fetching source..."
   _detail "URL:" "${TERMUX_PKG_SRCURL}"
 
-  # Spinner download — clean, no ugly progress bar
   _spin_chars='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
   _spin_i=0
   curl -fL --silent --retry 3 --retry-delay 2 --connect-timeout 30 "$TERMUX_PKG_SRCURL" -o "$SRC_FILE" &
@@ -522,11 +459,7 @@ if [[ -n "${TERMUX_PKG_SRCURL:-}" ]]; then
   _ok "Download complete"
   _HAS_SOURCE=1
 
-  # ==========================================
-  #  SHA256
-  # ==========================================
   if [[ -z "${TERMUX_PKG_SHA256:-}" ]]; then
-    # SHA256 kosong — hitung dan tampilkan, lalu fatal
     _CALC=$(sha256sum "$SRC_FILE" | awk '{print $1}')
     echo ""
     _fatal "TERMUX_PKG_SHA256 is empty"
@@ -559,12 +492,8 @@ if [[ -n "${TERMUX_PKG_SRCURL:-}" ]]; then
     _ok "Checksum verified"
   fi
 
-  # ==========================================
-  #  EXTRACT
-  # ==========================================
   _section "Extracting Source"
 
-  # Deteksi tipe file: magic bytes DULU, lalu fallback ekstensi URL
   _detect_filetype() {
     local f="$1"
     local url="${TERMUX_PKG_SRCURL:-}"
@@ -589,7 +518,6 @@ if [[ -n "${TERMUX_PKG_SRCURL:-}" ]]; then
     fi
   }
 
-  # _smart_extract: coba semua format
   _smart_extract() {
     local src="$1" dst="$2"
     if   (tar -xzf "$src" -C "$dst") 2>/dev/null; then echo "tar.gz"
@@ -635,7 +563,6 @@ if [[ -n "${TERMUX_PKG_SRCURL:-}" ]]; then
       ;;
   esac
 
-  # Flatten single-subdir
   if [[ -z "$PREBUILT_BIN" && -z "$PREBUILT_DEB" ]]; then
     _SUBDIRS=$(find "$SRC_ROOT" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l)
     _TOPFILES=$(find "$SRC_ROOT" -mindepth 1 -maxdepth 1 -type f 2>/dev/null | wc -l)
@@ -652,37 +579,26 @@ else
   _skip "No TERMUX_PKG_SRCURL defined — skipping download & extract"
 fi
 
-# =============================================
-#  EXPORT TERMUX_PKG_SRCDIR (FIX)
-# =============================================
 export TERMUX_PKG_SRCDIR="$SRC_ROOT"
 
-# =============================================
-#  AUTO-DETECT DEPENDENCIES (untuk prebuilt .deb)
-# =============================================
 if [[ -n "$PREBUILT_DEB" ]]; then
   _section "Analyzing Prebuilt Package"
 
-  # Extract control file dari .deb untuk baca dependencies
   _progress "Extracting package metadata..."
   CONTROL_DATA=$(dpkg-deb -f "$PREBUILT_DEB" 2>/dev/null || true)
 
   if [[ -n "$CONTROL_DATA" ]]; then
-    # Parse Depends field
     DEB_DEPENDS=$(echo "$CONTROL_DATA" | grep "^Depends:" | sed 's/^Depends: *//' || true)
 
     if [[ -n "$DEB_DEPENDS" ]]; then
       _detail "Found deps:" "$DEB_DEPENDS"
 
-      # Merge dengan TERMUX_PKG_DEPENDS yang sudah ada
       if [[ -n "${TERMUX_PKG_DEPENDS:-}" ]]; then
         COMBINED_DEPS="$TERMUX_PKG_DEPENDS,$DEB_DEPENDS"
       else
         COMBINED_DEPS="$DEB_DEPENDS"
       fi
 
-      # Clean up: hapus version constraints (>= 1.0, << 2.0, dll)
-      # Ubah '|' (OR dependencies) jadi ','
       CLEANED_DEPS=$(echo "$COMBINED_DEPS" | sed -e 's/([^)]*)//g' -e 's/|/,/g' -e 's/  */ /g' | tr -d ' ')
 
       # Install dependencies yang belum ada
@@ -694,7 +610,6 @@ if [[ -n "$PREBUILT_DEB" ]]; then
         dep=$(echo "$dep" | tr -d ' ')
         [[ -z "$dep" ]] && continue
 
-        # Cek apakah sudah terinstall
         if ! dpkg -l "$dep" 2>/dev/null | grep -q "^ii"; then
           _need_install+=("$dep")
           printf "      ${GRAY}+${R} ${WHITE}%s${R} ${YELLOW}(auto-detected)${R}\n" "$dep"
@@ -715,9 +630,6 @@ if [[ -n "$PREBUILT_DEB" ]]; then
   fi
 fi
 
-# =============================================
-#  BUILD STEP (opsional)
-# =============================================
 if declare -f termux_step_make > /dev/null 2>&1; then
   _section "Building Source"
   _step "Custom termux_step_make() found, running..."
@@ -765,13 +677,9 @@ if declare -f termux_step_make > /dev/null 2>&1; then
   _ok "Build completed"
 fi
 
-# =============================================
-#  INSTALL
-# =============================================
 _section "Installing Files (DESTDIR)"
 
 if [[ -n "$PREBUILT_BIN" ]]; then
-  # ── Mode: ELF / Raw Binary ──
   _step "Mode: ELF binary"
   mkdir -p "$WORK_DIR/pkg/$PREFIX/bin"
   install -Dm755 "$PREBUILT_BIN" "$WORK_DIR/pkg/$PREFIX/bin/$PACKAGE"
@@ -801,24 +709,20 @@ elif declare -f termux_step_make_install > /dev/null 2>&1; then
   _step "Mode: Custom termux_step_make_install()"
   export TERMUX_PREFIX="$PREFIX"
   export TERMUX_PKG_SRCDIR="$SRC_ROOT"
-  # Masuk ke direktori source yang aktual
   _install_dir="$SRC_ROOT"
   [[ -d "$_install_dir" ]] || _install_dir="$SRC_ROOT"
   cd "$_install_dir"
   _detail "Install dir:" "$_install_dir"
 
-  # Jalankan termux_step_make_install dengan error handling
   _INSTALL_LOG=$(mktemp)
   _INSTALL_EXIT=0
 
-  # Spinner + live status dari log
   _spin_chars='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
   _spin_i=0
   termux_step_make_install > "$_INSTALL_LOG" 2>&1 &
   _INSTALL_PID=$!
   while kill -0 "$_INSTALL_PID" 2>/dev/null; do
     _sc="${_spin_chars:$(( _spin_i % ${#_spin_chars} )):1}"
-    # Ambil baris terakhir dari log sebagai status hint
     _last_line=$(tail -n1 "$_INSTALL_LOG" 2>/dev/null | tr -d '\r\n' | sed 's/\x1b\[[0-9;]*m//g' | cut -c1-40)
     if [[ -n "$_last_line" ]]; then
       printf "\r  ${BCYAN}[  %s  ]${R}  ${GRAY}%s${R}%-20s" "$_sc" "$_last_line" " "
@@ -839,7 +743,6 @@ elif declare -f termux_step_make_install > /dev/null 2>&1; then
     _fatal "termux_step_make_install() failed (exit $_INSTALL_EXIT)"
     echo ""
 
-    # ── npm error: package.json tidak ditemukan ──
     if echo "$_INSTALL_OUTPUT" | grep -q "ENOENT.*package.json"; then
       printf "  ${BRED}╭─ Error: package.json not found${R}\n"
       printf "  ${BRED}│${R}\n"
@@ -859,7 +762,6 @@ elif declare -f termux_step_make_install > /dev/null 2>&1; then
       printf "  ${BRED}│${R}  • Paket ini bukan Node.js package standar\n"
       printf "  ${BRED}╰─ Fix: periksa ${BCYAN}$BUILD_SH${R}\n"
 
-    # ── npm error: module not found ──
     elif echo "$_INSTALL_OUTPUT" | grep -q "Cannot find module\|MODULE_NOT_FOUND"; then
       printf "  ${BRED}╭─ Error: npm module not found${R}\n"
       printf "  ${BRED}│${R}  Missing dependency saat install\n"
@@ -868,7 +770,6 @@ elif declare -f termux_step_make_install > /dev/null 2>&1; then
       printf "  ${BRED}│${R}  ${GRAY}TERMUX_PKG_DEPENDS=\"nodejs\"${R}\n"
       printf "  ${BRED}╰─ Fix: periksa ${BCYAN}$BUILD_SH${R}\n"
 
-    # ── npm error: permission denied ──
     elif echo "$_INSTALL_OUTPUT" | grep -q "EACCES\|permission denied"; then
       printf "  ${BRED}╭─ Error: Permission denied${R}\n"
       printf "  ${BRED}│${R}  npm tidak punya akses tulis ke PREFIX\n"
@@ -876,7 +777,6 @@ elif declare -f termux_step_make_install > /dev/null 2>&1; then
       printf "  ${BRED}│${R}  ${GRAY}PREFIX:${R} $PREFIX\n"
       printf "  ${BRED}╰─ Cek permission direktori PREFIX${R}\n"
 
-    # ── npm error: network ──
     elif echo "$_INSTALL_OUTPUT" | grep -q "ENOTFOUND\|network\|ETIMEDOUT"; then
       printf "  ${BRED}╭─ Error: Network issue${R}\n"
       printf "  ${BRED}│${R}  npm tidak bisa connect ke registry\n"
@@ -884,7 +784,6 @@ elif declare -f termux_step_make_install > /dev/null 2>&1; then
       printf "  ${BRED}│${R}  ${GRAY}Cek koneksi internet dan coba lagi${R}\n"
       printf "  ${BRED}╰─ Atau set npm registry: npm config set registry https://registry.npmjs.org${R}\n"
 
-    # ── make/cmake/gcc error ──
     elif echo "$_INSTALL_OUTPUT" | grep -qE "^make.*Error|CMake Error|gcc.*error:|undefined reference"; then
       printf "  ${BRED}╭─ Error: Build/Compile failed${R}\n"
       printf "  ${BRED}│${R}\n"
@@ -897,7 +796,6 @@ elif declare -f termux_step_make_install > /dev/null 2>&1; then
       printf "  ${BRED}│${R}  ${GRAY}pkg install build-essential cmake${R}\n"
       printf "  ${BRED}╰─ Fix: periksa ${BCYAN}$BUILD_SH${R}\n"
 
-    # ── generic fallback ──
     else
       printf "  ${BRED}╭─ Install output (last 10 lines):${R}\n"
       echo "$_INSTALL_OUTPUT" | tail -10 | while IFS= read -r line; do
@@ -916,11 +814,9 @@ elif declare -f termux_step_make_install > /dev/null 2>&1; then
   _progress "Staging installed files..."
   mkdir -p "$WORK_DIR/pkg$PREFIX/bin" "$WORK_DIR/pkg$PREFIX/lib"
 
-  # Stage binary
   [[ -f "$PREFIX/bin/$PACKAGE" ]] && \
     install -Dm755 "$PREFIX/bin/$PACKAGE" "$WORK_DIR/pkg$PREFIX/bin/$PACKAGE"
 
-  # Stage pip entry_point binaries (nama bisa berbeda dari PACKAGE)
   _PY_SITE_TMP=$(python3 -c "import site; print(site.getsitepackages()[0])" 2>/dev/null || true)
   if [[ -n "$_PY_SITE_TMP" ]]; then
     _EP_FILE=$(find "$_PY_SITE_TMP" -maxdepth 2 -iname "entry_points.txt" -path "*${PACKAGE}*" 2>/dev/null | head -1 || true)
@@ -934,23 +830,19 @@ elif declare -f termux_step_make_install > /dev/null 2>&1; then
     fi
   fi
 
-  # Stage lib/$PACKAGE (non-npm)
   if [[ -d "$PREFIX/lib/$PACKAGE" ]]; then
     cp -r "$PREFIX/lib/$PACKAGE" "$WORK_DIR/pkg$PREFIX/lib/"
     _detail "Staged lib:" "$PREFIX/lib/$PACKAGE"
   fi
 
-  # Stage lib/node_modules/$PACKAGE (npm install -g)
   if [[ -d "$PREFIX/lib/node_modules/$PACKAGE" ]]; then
     mkdir -p "$WORK_DIR/pkg$PREFIX/lib/node_modules"
     cp -r "$PREFIX/lib/node_modules/$PACKAGE" "$WORK_DIR/pkg$PREFIX/lib/node_modules/"
     _detail "Staged npm:" "$PREFIX/lib/node_modules/$PACKAGE"
   fi
 
-  # Stage Python site-packages (pip install)
   _PY_SITE=$(python3 -c "import site; print(site.getsitepackages()[0])" 2>/dev/null || true)
   if [[ -n "$_PY_SITE" ]]; then
-    # Cari package di site-packages berdasarkan nama (case-insensitive)
     _PY_PKG=$(find "$_PY_SITE" -maxdepth 1 -iname "${PACKAGE}" -o \
                                -maxdepth 1 -iname "${PACKAGE}-*.dist-info" 2>/dev/null | \
               grep -v "dist-info" | head -1 || true)
@@ -958,7 +850,6 @@ elif declare -f termux_step_make_install > /dev/null 2>&1; then
       _PY_SITE_DEST="$WORK_DIR/pkg$_PY_SITE"
       mkdir -p "$_PY_SITE_DEST"
       cp -r "$_PY_PKG" "$_PY_SITE_DEST/"
-      # Juga copy dist-info supaya pip/dpkg tahu package terinstall
       find "$_PY_SITE" -maxdepth 1 -iname "${PACKAGE}-*.dist-info" -exec cp -r {} "$_PY_SITE_DEST/" \; 2>/dev/null || true
       _detail "Staged pip:" "$_PY_PKG"
     fi
@@ -971,8 +862,6 @@ elif declare -f termux_step_make_install > /dev/null 2>&1; then
   _ok "Custom install completed"
 
 else
-  # ── Mode: Auto-detect ──
-  # Cek dulu apakah ini Node.js package (ada package.json di source)
   _NODE_PKG_JSON=$(find "$SRC_ROOT" -maxdepth 3 -name "package.json" -not -path "*/node_modules/*" | head -n1 || true)
 
   if [[ -n "$_NODE_PKG_JSON" ]]; then
@@ -981,7 +870,6 @@ else
     _detail "package.json:" "$_NODE_PKG_JSON"
     _detail "Install dir:"  "$_NODE_SRC_DIR"
 
-    # Pastikan npm tersedia
     if ! command -v npm &>/dev/null; then
       _fatal "npm not found — install nodejs first"
       printf "  ${BRED}╭─ Fix${R}\n"
@@ -995,7 +883,6 @@ else
     _NPM_LOG=$(mktemp)
     _NPM_EXIT=0
 
-    # Spinner saat npm install (bisa lama)
     _spin_chars='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
     _spin_i=0
     npm install -g --prefix "$PREFIX" "$_NODE_SRC_DIR" > "$_NPM_LOG" 2>&1 &
@@ -1027,7 +914,6 @@ else
 
     _ok "npm install completed"
 
-    # Stage binary ke WORK_DIR/pkg untuk .deb
     _NPM_BIN=$(find "$PREFIX/bin" -name "$PACKAGE" -o -name "${PACKAGE}.js" 2>/dev/null | head -n1 || true)
     if [[ -n "$_NPM_BIN" ]]; then
       mkdir -p "$WORK_DIR/pkg/$PREFIX/bin"
@@ -1035,7 +921,6 @@ else
       _detail "Binary:" "$_NPM_BIN"
     fi
 
-    # Stage lib/node_modules jika ada
     _NPM_LIB="$PREFIX/lib/node_modules/$PACKAGE"
     if [[ -d "$_NPM_LIB" ]]; then
       mkdir -p "$WORK_DIR/pkg/$PREFIX/lib/node_modules"
@@ -1060,25 +945,20 @@ else
   if [[ -n "$MAIN_FILE" ]]; then
     BASENAME="$(basename "$MAIN_FILE")"
 
-    # Copy SELURUH repo (SRC_ROOT) ke lib/ — bukan hanya subdir dari main file
     mkdir -p "$WORK_DIR/pkg/$PREFIX/lib/$PACKAGE"
     cp -r "$SRC_ROOT"/. "$WORK_DIR/pkg/$PREFIX/lib/$PACKAGE/"
     _detail "Staged:"  "$PREFIX/lib/$PACKAGE/ (full repo)"
 
-    # Hitung path relatif main file dari SRC_ROOT untuk wrapper
     MAIN_REL="${MAIN_FILE#$SRC_ROOT/}"
 
-    # Set execute permission pada main file
     chmod +x "$WORK_DIR/pkg/$PREFIX/lib/$PACKAGE/$MAIN_REL"
 
-    # Deteksi tipe file: ELF binary atau script?
     _file_magic=$(file -b "$MAIN_FILE" 2>/dev/null || echo "unknown")
     _is_elf=0
     if echo "$_file_magic" | grep -qi "ELF.*executable"; then
       _is_elf=1
     fi
 
-    # Jika ELF binary, buat symlink langsung (bukan wrapper script)
     if [[ $_is_elf -eq 1 ]]; then
       mkdir -p "$WORK_DIR/pkg/$PREFIX/bin"
       ln -sf "$PREFIX/lib/$PACKAGE/$MAIN_REL" "$WORK_DIR/pkg/$PREFIX/bin/$PACKAGE"
@@ -1088,7 +968,6 @@ else
       _detail "Type:"    "ELF binary"
       _detail "Symlink:" "$PREFIX/bin/$PACKAGE → lib/$PACKAGE/$MAIN_REL"
     else
-      # Script — deteksi interpreter
       FIRST_LINE="$(head -n1 "$MAIN_FILE" 2>/dev/null || true)"
       if [[ "$FIRST_LINE" =~ ^#! ]]; then
         INTERPRETER=$(echo "$FIRST_LINE" | sed 's|^#!||' | awk '{print $1}')
@@ -1103,7 +982,6 @@ else
         INTERPRETER="bash"
       fi
 
-      # Buat wrapper script di bin/
       mkdir -p "$WORK_DIR/pkg/$PREFIX/bin"
       cat > "$WORK_DIR/pkg/$PREFIX/bin/$PACKAGE" <<EOF
 #!/data/data/com.termux/files/usr/bin/bash
@@ -1121,12 +999,9 @@ EOF
     _skip "Skipping install step"
   fi
 
-  fi # end Node.js auto-detect else
+  fi
 fi
 
-# =============================================
-#  CONTROL FILE
-# =============================================
 _section "Generating Package Metadata"
 
 CONTROL_DIR="$WORK_DIR/pkg/DEBIAN"
@@ -1151,16 +1026,12 @@ _detail "Version:"    "${TERMUX_PKG_VERSION:-0.0.1}"
 _detail "Arch:"       "$ARCH"
 _detail "Maintainer:" "${TERMUX_PKG_MAINTAINER:-unknown}"
 
-# =============================================
-#  BUILD DEB
-# =============================================
 _section "Building .deb Package"
 
 DEB_FILE="$DEB_DIR/${TERMUX_PKG_NAME:-$PACKAGE}_${TERMUX_PKG_VERSION:-0.0.1}_${ARCH}.deb"
 _progress "Running dpkg-deb..."
 _detail "Output:" "$(basename "$DEB_FILE")"
 
-# Run dpkg-deb dan tampilkan output real-time, sekaligus capture untuk error handling
 DPKG_LOG=$(mktemp)
 if dpkg-deb --build "$WORK_DIR/pkg" "$DEB_FILE" 2>&1 | tee "$DPKG_LOG"; then
   DPKG_EXIT=0
@@ -1175,7 +1046,6 @@ if [[ $DPKG_EXIT -ne 0 ]]; then
   _fatal "Failed to build .deb package"
   echo ""
 
-  # Parse error dari dpkg-deb output
   if echo "$DPKG_OUTPUT" | grep -q "version number does not start with digit"; then
     printf "  ${BRED}╭─ Error Details${R}\n"
     printf "  ${BRED}│${R}\n"
@@ -1201,7 +1071,6 @@ if [[ $DPKG_EXIT -ne 0 ]]; then
     printf "  ${BRED}╰─ Fix: Run with appropriate permissions or check WORK_DIR ownership${R}\n"
     echo ""
   else
-    # Generic error dengan full output
     printf "  ${BRED}╭─ dpkg-deb output:${R}\n"
     echo "$DPKG_OUTPUT" | sed 's/^/  │  /'
     printf "  ${BRED}╰─${R}\n"
@@ -1213,30 +1082,22 @@ fi
 
 _ok "Package built successfully"
 
-# =============================================
-#  INSTALL DEB
-# =============================================
 _section "Installing Package"
 
 _progress "Running dpkg -i..."
 dpkg -i "$DEB_FILE"
 
-# ── HOLD PACKAGE: protect from pkg upgrade overwrite ──────────────────────────
 if apt-mark hold "$PACKAGE" > /dev/null 2>&1; then
   _ok "Package held — protected from 'pkg upgrade' overwrite"
 else
   _warn "Could not hold package — may be overwritten by 'pkg upgrade'"
 fi
 
-# ── WARN jika package juga ada di official Termux repo ────────────────────────
 if apt-cache show "$PACKAGE" > /dev/null 2>&1; then
   _warn "Package '$PACKAGE' also exists in official Termux repo"
   _detail "Note:" "Package is held — official version will be skipped on upgrade"
 fi
 
-# =============================================
-#  POST-INSTALL VALIDATION
-# =============================================
 _section "Validating Installation"
 
 _BIN_PATH=$(command -v "$PACKAGE" 2>/dev/null || true)
@@ -1244,7 +1105,6 @@ _BIN_PATH=$(command -v "$PACKAGE" 2>/dev/null || true)
 if [[ -n "$_BIN_PATH" ]]; then
   _ok "Binary found: $_BIN_PATH"
 else
-  # Cek manual di PREFIX/bin
   if [[ -f "$PREFIX/bin/$PACKAGE" ]]; then
     _ok "Binary found: $PREFIX/bin/$PACKAGE"
     _BIN_PATH="$PREFIX/bin/$PACKAGE"
@@ -1268,9 +1128,6 @@ else
   fi
 fi
 
-# =============================================
-#  DONE
-# =============================================
 echo ""
 _line_heavy
 printf "  ${BG_GREEN}${BLACK}${BOLD}  DONE  ${R}  "

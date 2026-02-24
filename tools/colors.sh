@@ -1,5 +1,6 @@
 # ===============================
 # ANSI Color Codes for Termux-Build Scripts
+# Download contoh-contoh colors di tools bashxt
 # ===============================
 
 # Regular Colors
@@ -63,5 +64,5 @@ BOLD_BRIGHT_MAGENTA='\033[1;95m'
 BOLD_BRIGHT_CYAN='\033[1;96m'
 BOLD_BRIGHT_WHITE='\033[1;97m'
 
-# Reset
+# Reset color
 RESET='\033[0m'

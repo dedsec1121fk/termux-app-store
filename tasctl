@@ -17,12 +17,12 @@ ok()   { printf "✓ %s\n" "$*"; }
 warn() { printf "⚠ %s\n" "$*" >&2; }
 err()  { printf "✗ %s\n" "$*" >&2; exit 1; }
 
-# ---------------- ARCH DETECTION ----------------
 detect_arch() {
   case "$(uname -m)" in
     aarch64) echo "termux-app-store-aarch64" ;;
     armv7l)  echo "termux-app-store-arm" ;;
     x86_64)  echo "termux-app-store-x86_64" ;;
+    i686)  echo "termux-app-store-i686" ;;
     *) err "Unsupported architecture: $(uname -m)" ;;
   esac
 }
@@ -53,7 +53,6 @@ EOF
   fi
 }
 
-# ---------------- INSTALL / UPDATE ----------------
 install_app() {
   BIN="$(detect_arch)"
   URL="https://github.com/$REPO/releases/$VERSION/download/$BIN"
@@ -71,7 +70,6 @@ install_app() {
   echo "→ Run with: $APP_NAME"
 }
 
-# ---------------- UNINSTALL ----------------
 uninstall_app() {
   log "Uninstalling $APP_NAME"
 
@@ -81,7 +79,6 @@ uninstall_app() {
   ok "Uninstalled successfully"
 }
 
-# ---------------- USAGE ----------------
 usage() {
   cat <<EOF
 Usage: $CTL_NAME <command>
@@ -94,7 +91,6 @@ Commands:
 EOF
 }
 
-# ---------------- MAIN ----------------
 cmd="${1:-help}"
 
 case "$cmd" in

@@ -4,9 +4,7 @@ set -e
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 COLORS_FILE="$ROOT/tools/colors.sh"
 
-# Safe color loader (CI friendly)
 if [[ -f "$COLORS_FILE" ]]; then
-  # shellcheck disable=SC1090
   source "$COLORS_FILE"
 else
   CYAN=""

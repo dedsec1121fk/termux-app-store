@@ -4,10 +4,8 @@ set -e
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 VALIDATOR="$ROOT/tools/validate-build.sh"
 
-# Safe color loader (CI friendly)
 COLORS_FILE="$ROOT/tools/colors.sh"
 if [[ -f "$COLORS_FILE" ]]; then
-  # shellcheck disable=SC1090
   source "$COLORS_FILE"
 else
   BLUE=""
@@ -20,10 +18,8 @@ fi
 
 FAIL=0
 
-# Ambil target package
 TARGET="${1:-}"
 
-# Kalau masih kebawa subcommand
 if [[ "$TARGET" == "check-pr" ]]; then
     TARGET="${2:-}"
 fi
