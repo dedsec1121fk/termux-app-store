@@ -27,115 +27,115 @@
 
 ---
 
-## Apa itu Termux App Store?
+## What is Termux App Store?
 
-**Termux App Store** adalah **TUI (Terminal User Interface)** berbasis Python ([Textual](https://github.com/Textualize/textual)) dan CLI yang memungkinkan pengguna Termux untuk **menelusuri, membangun, dan mengelola tool/aplikasi** langsung dari perangkat Android — tanpa akun, tanpa telemetry, dan tanpa ketergantungan cloud.
+**Termux App Store** is a **TUI (Terminal User Interface)** built with Python ([Textual](https://github.com/Textualize/textual)) and CLI that lets Termux users **browse, build, and manage tools/apps** directly on Android — no account, no telemetry, no cloud dependency.
 
 > [!IMPORTANT]
-> Termux App Store **bukan repository biner terpusat** dan **bukan installer otomatis tersembunyi**.
-> Semua build dijalankan **secara lokal, transparan, dan atas kendali penuh pengguna**.
+> Termux App Store is **not a centralized binary repository** and **not a hidden auto-installer**.
+> All builds run **locally, transparently, and under full user control**.
 
 ---
 
-## Termux App Store Untuk Siapa?
+## Who Is It For?
 
-| Pengguna | Kegunaan |
+| User | Use Case |
 |---|---|
-| 📱 Pengguna Termux | Kontrol penuh atas build & package |
-| 🛠️ Developer | Distribusikan tool via source-based packaging |
-| 🔍 Reviewer & Auditor | Review dan validasi build script |
-| 📦 Maintainer | Kelola banyak package Termux sekaligus |
+| 📱 Termux Users | Full control over builds & packages |
+| 🛠️ Developers | Distribute tools via source-based packaging |
+| 🔍 Reviewers & Auditors | Review and validate build scripts |
+| 📦 Maintainers | Manage multiple Termux packages at once |
 
 ---
 
-## Screenshot
+## Screenshots
 
 <div align="center">
 
-<img src=".assets/0.jpeg" width="74%" alt="Termux App Store — Tampilan Utama"/>
+<img src=".assets/0.jpeg" width="74%" alt="Termux App Store — Main View"/>
 
 <br/><br/>
 
 | Main Interface | Install Interface | Menu Palette |
 |:---:|:---:|:---:|
 | <img src=".assets/0main.jpg" width="220" alt="Main Interface"/> | <img src=".assets/1install.jpg" width="220" alt="Install Interface"/> | <img src=".assets/2pallete.jpg" width="220" alt="Menu Palette Interface"/> |
-| TUI menu utama | Proses install package | Command palette |
+| TUI main menu | Package install process | Command palette |
 
-> ✨ User-friendly dengan dukungan **touchscreen** penuh
+> ✨ User-friendly with full **touchscreen** support
 
 </div>
 
 ---
 
-## Instalasi Cepat
+## Quick Install
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/djunekz/termux-app-store/master/install.sh | bash
 ```
 
-Setelah instalasi, jalankan:
+Then run:
 
 ```bash
-termux-app-store        # Buka TUI interaktif
-termux-app-store -h     # Lihat bantuan CLI
+termux-app-store        # Open interactive TUI
+termux-app-store -h     # Show CLI help
 ```
 
 ---
 
-## Penggunaan
+## Usage
 
-### TUI — Antarmuka Interaktif
+### TUI — Interactive Interface
 ```bash
 termux-app-store
 ```
 
-### CLI — Perintah Langsung
+### CLI — Direct Commands
 
 ```bash
-termux-app-store list                  # Daftar semua package
-termux-app-store show <package>        # Detail package
-termux-app-store install <package>     # Build & install package
-termux-app-store update                # Update index package
-termux-app-store upgrade               # Upgrade semua package
-termux-app-store upgrade <package>     # Upgrade package tertentu
-termux-app-store version               # Cek versi terbaru
-termux-app-store help                  # Bantuan lengkap
+termux-app-store list                  # List all packages
+termux-app-store show <package>        # Show package details
+termux-app-store install <package>     # Build & install a package
+termux-app-store update                # Check for available updates
+termux-app-store upgrade               # Upgrade all packages
+termux-app-store upgrade <package>     # Upgrade a specific package
+termux-app-store version               # Check latest version
+termux-app-store help                  # Full help
 ```
 
 ---
 
-## ✨ Fitur Utama
+## ✨ Features
 
 <table>
 <tr>
 <td width="50%">
 
 **📦 Package Browser (TUI)**
-Jelajahi paket dari folder `packages/` secara interaktif dengan navigasi keyboard & touchscreen.
+Browse packages from the `packages/` folder interactively with keyboard & touchscreen navigation.
 
 **🧠 Smart Build Validator**
-Deteksi dependency yang tidak didukung Termux, lengkap dengan badge status otomatis.
+Detects unsupported Termux dependencies with automatic status badges.
 
-**🔍 Search & Filter Real-time**
-Cari paket berdasarkan nama atau deskripsi secara instan tanpa reload.
+**🔍 Real-time Search & Filter**
+Instantly search packages by name or description — no reload needed.
 
 **⚡ One-Click Build**
-Install atau update paket cukup satu klik via `build-package.sh`.
+Install or update a package in one click via `build-package.sh`.
 
 </td>
 <td width="50%">
 
 **✅ One-Click Validator**
-Cek validasi package sebelum distribusi via `./termux-build`.
+Validate packages before distribution via `./termux-build`.
 
 **🛠️ One-Click Manage**
-Install / update / uninstall Termux App Store itu sendiri via `./tasctl`.
+Install / update / uninstall Termux App Store itself via `./tasctl`.
 
 **🧬 Self-Healing Path Resolver**
-Auto-detect lokasi app meski folder dipindah atau di-rename.
+Auto-detects app location even if the folder is moved or renamed.
 
 **🔐 Privacy-First**
-Tanpa akun, tanpa tracking, tanpa telemetry — offline sepenuhnya.
+No account, no tracking, no telemetry — fully offline.
 
 </td>
 </tr>
@@ -143,99 +143,99 @@ Tanpa akun, tanpa tracking, tanpa telemetry — offline sepenuhnya.
 
 ---
 
-## Badge Status Package
+## Package Status Badges
 
-| Badge | Keterangan |
+| Badge | Description |
 |---|---|
-|  **NEW** | Package baru (< 7 hari) |
-|  **UPDATE** | Versi lebih baru tersedia |
-|  **INSTALLED** | Versi terpasang sudah terkini |
-|  **UNSUPPORTED** | Dependency tidak tersedia di Termux |
+| **NEW** | Newly added package (< 7 days) |
+| **UPDATE** | A newer version is available |
+| **INSTALLED** | Installed version is up-to-date |
+| **UNSUPPORTED** | Dependency not available in Termux |
 
 ---
 
-## 🧩 Cara Menambahkan Package
+## 🧩 Adding a Package
 
-Setiap package **wajib** memiliki file `build.sh`:
+Every package **must** have a `build.sh` file:
 
 ```
-packages/<nama_tool>/build.sh
+packages/<tool-name>/build.sh
 ```
 
-### Template Minimal `build.sh`
+### Minimal `build.sh` Template
 
 ```bash
 TERMUX_PKG_HOMEPAGE=""
 TERMUX_PKG_DESCRIPTION=""
 TERMUX_PKG_LICENSE=""
-TERMUX_PKG_MAINTAINER="@username-github"
+TERMUX_PKG_MAINTAINER="@your-github-username"
 TERMUX_PKG_VERSION=""
 TERMUX_PKG_SRCURL=""
 TERMUX_PKG_SHA256=""
 ```
 
 > [!NOTE]
-> Lihat template lengkap di folder `template/build.sh`
-> atau jalankan: `./termux-build template`
+> See the full template in `template/build.sh`
+> or run: `./termux-build template`
 
 ---
 
 ## 🛠️ termux-build — Validation Tool
 
-**termux-build** adalah tool validasi dan helper untuk reviewer — bukan tool upload atau publish otomatis.
+**termux-build** is a validation and reviewer helper tool — not an auto-upload or auto-publish tool.
 
 ```bash
-./termux-build lint <package>        # Lint build script
-./termux-build check-pr <package>    # Cek kesiapan PR
-./termux-build doctor                # Diagnosis environment
-./termux-build suggest <package>     # Saran perbaikan
-./termux-build explain <package>     # Penjelasan detail package
-./termux-build template              # Generate template build.sh
-./termux-build guide                 # Panduan kontribusi
+./termux-build lint <package>        # Lint a build script
+./termux-build check-pr <package>    # Check PR readiness
+./termux-build doctor                # Diagnose environment
+./termux-build suggest <package>     # Get improvement suggestions
+./termux-build explain <package>     # Detailed package explanation
+./termux-build template              # Generate build.sh template
+./termux-build guide                 # Contribution guide
 ```
 
 > [!NOTE]
-> termux-build **hanya membaca dan memvalidasi** — tidak mengubah file, tidak build otomatis, tidak upload ke GitHub.
+> termux-build **only reads and validates** — it does not modify files, auto-build, or upload to GitHub.
 
 ---
 
-## Arsitektur
+## Architecture
 
 ```
 termux-app-store/
-├── packages/              # Direktori semua package
-│   └── <nama_tool>/
+├── packages/              # All packages directory
+│   └── <tool-name>/
 │       └── build.sh       # Metadata & build script
 ├── template/
-│   └── build.sh           # Template package
-├── tasctl                 # Installer/updater/uninstaller TAS
+│   └── build.sh           # Package template
+├── tasctl                 # TAS installer/updater/uninstaller
 ├── termux-build           # Validation & review tool
-└── install.sh             # Installer utama
+└── install.sh             # Main installer
 ```
 
-> 📄 Detail lengkap: [ARCHITECTURE.md](ARCHITECTURE.md)
+> 📄 Full details: [ARCHITECTURE.md](ARCHITECTURE.md)
 
 ---
 
-## 🔐 Keamanan & Privasi
+## 🔐 Security & Privacy
 
 <table>
 <tr>
 <td width="50%">
 
-**🔐 Keamanan**
-- Tidak meminta permission tambahan
-- Tidak membuka port jaringan
-- Tidak menjalankan service background
-- Build hanya berjalan atas perintah eksplisit user
+**🔐 Security**
+- No extra permissions required
+- No network ports opened
+- No background services running
+- Builds only run on explicit user command
 
 </td>
 <td width="50%">
 
-**🛡️ Privasi**
-- Tanpa akun atau registrasi
-- Tanpa analytics atau pelacakan
-- Tanpa telemetry apapun
+**🛡️ Privacy**
+- No account or registration
+- No analytics or tracking
+- No telemetry of any kind
 - Offline-first by design
 
 </td>
@@ -246,75 +246,75 @@ termux-app-store/
 
 ---
 
-## Upload Tool ke Termux App Store
+## Upload Your Tool to Termux App Store
 
-Ingin mendistribusikan tool kamu ke komunitas Termux?
+Want to share your tool with the Termux community?
 
-**Keuntungan upload tool:**
-- Tool bisa diunduh banyak pengguna Termux
-- Update cukup dengan mengubah `version` dan `sha256` di `build.sh`
-- Tool muncul di TUI dengan badge status otomatis
+**Benefits of uploading:**
+- Your tool becomes available to all Termux users
+- Updates only require changing `version` and `sha256` in `build.sh`
+- Your tool appears in the TUI with automatic status badges
 
-**Cara upload:**
+**How to upload:**
 
 ```bash
-# 1. Fork repo ini
-# 2. Tambahkan folder package kamu:
-mkdir packages/nama-tool-kamu
-# 3. Buat build.sh sesuai template
-# 4. Validasi dengan termux-build:
-./termux-build lint packages/nama-tool-kamu
-# 5. Submit Pull Request
+# 1. Fork this repo
+# 2. Add your package folder:
+mkdir packages/your-tool-name
+# 3. Create build.sh from the template
+# 4. Validate with termux-build:
+./termux-build lint packages/your-tool-name
+# 5. Submit a Pull Request
 ```
 
-> 📄 Panduan lengkap: [HOW_TO_UPLOAD.md](HOW_TO_UPLOAD.md)
+> 📄 Full guide: [HOW_TO_UPLOAD.md](HOW_TO_UPLOAD.md)
 
 ---
 
-## 🤝 Kontribusi
+## 🤝 Contributing
 
-Semua bentuk kontribusi sangat disambut!
+All contributions are welcome!
 
-| Cara Berkontribusi | Keterangan |
+| How to Contribute | Description |
 |---|---|
-| 📦 Tambah package | Submit package tool baru |
-| 🐛 Laporkan bug | Buat issue di GitHub |
-| 🔀 Kirim PR | Perbaikan code atau dokumentasi |
-| 🔍 Review PR | Bantu validasi kontribusi orang lain |
-| 🔐 Audit security | Review keamanan build script |
-| 📝 Perbaiki docs | Perjelas atau terjemahkan dokumentasi |
+| 📦 Add a package | Submit a new tool package |
+| 🐛 Report a bug | Open an issue on GitHub |
+| 🔀 Send a PR | Code or documentation improvements |
+| 🔍 Review PRs | Help validate others' contributions |
+| 🔐 Security audit | Review build script security |
+| 📝 Improve docs | Clarify or translate documentation |
 
-> 📄 Panduan lengkap: [CONTRIBUTING.md](CONTRIBUTING.md)
+> 📄 Full guide: [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ---
 
-## ❓ Bantuan & Dokumentasi
+## ❓ Help & Documentation
 
-| Dokumen | Keterangan |
+| Document | Description |
 |---|---|
-| [FAQ.md](FAQ.md) | Pertanyaan yang sering diajukan |
-| [TROUBLESHOOTING.md](TROUBLESHOOTING.md) | Solusi masalah umum |
-| [HOW_TO_UPLOAD.md](HOW_TO_UPLOAD.md) | Cara upload tool |
-| [CONTRIBUTING.md](CONTRIBUTING.md) | Panduan kontribusi |
-| [SUPPORT.md](SUPPORT.md) | Cara mendapatkan bantuan |
+| [FAQ.md](FAQ.md) | Frequently asked questions |
+| [TROUBLESHOOTING.md](TROUBLESHOOTING.md) | Solutions to common problems |
+| [HOW_TO_UPLOAD.md](HOW_TO_UPLOAD.md) | How to upload your tool |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | Contribution guide |
+| [SUPPORT.md](SUPPORT.md) | How to get support |
 
 ---
 
-## 🧠 Filosofi
+## 🧠 Philosophy
 
 > *"Local first. Control over convenience. Transparency over magic."*
 
-Termux App Store dibuat untuk pengguna yang ingin:
-- Memahami sepenuhnya apa yang dijalankan di perangkat mereka
-- Mengontrol build dan source secara langsung
-- Menghindari vendor lock-in dan ketergantungan cloud
-- Berbagi tool dengan komunitas Termux secara terbuka
+Termux App Store is built for users who want to:
+- Fully understand what runs on their device
+- Control builds and sources directly
+- Avoid vendor lock-in and cloud dependency
+- Share tools openly with the Termux community
 
 ---
 
-## 📜 Lisensi
+## 📜 License
 
-Proyek ini dilisensikan di bawah **MIT License** — lihat [LICENSE](LICENSE) untuk detail.
+This project is licensed under the **MIT License** — see [LICENSE](LICENSE) for details.
 
 ---
 
@@ -330,14 +330,14 @@ Proyek ini dilisensikan di bawah **MIT License** — lihat [LICENSE](LICENSE) un
 
 ---
 
-## ⭐ Dukung Proyek Ini
+## ⭐ Support This Project
 
-Jika Termux App Store berguna untukmu:
+If Termux App Store has been useful to you:
 
-- ⭐ **Star** repo ini — membantu orang lain menemukannya
-- 🧩 **Bagikan** ke komunitas Termux & Android
-- 🐛 **Laporkan bug** via Issues
-- 🔀 **Kirim PR** untuk perbaikan apapun
+- ⭐ **Star** this repo — helps others discover it
+- 🧩 **Share** it in Termux & Android communities
+- 🐛 **Report bugs** via Issues
+- 🔀 **Submit a PR** for any improvement
 
 ---
 
