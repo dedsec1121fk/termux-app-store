@@ -27,7 +27,7 @@
 
 ---
 
-## 📖 Apa itu Termux App Store?
+## Apa itu Termux App Store?
 
 **Termux App Store** adalah **TUI (Terminal User Interface)** berbasis Python ([Textual](https://github.com/Textualize/textual)) dan CLI yang memungkinkan pengguna Termux untuk **menelusuri, membangun, dan mengelola tool/aplikasi** langsung dari perangkat Android — tanpa akun, tanpa telemetry, dan tanpa ketergantungan cloud.
 
@@ -37,7 +37,7 @@
 
 ---
 
-## 👥 Untuk Siapa?
+## Termux App Store Untuk Siapa?
 
 | Pengguna | Kegunaan |
 |---|---|
@@ -48,7 +48,7 @@
 
 ---
 
-## 📱 Screenshot
+## Screenshot
 
 <div align="center">
 
@@ -67,7 +67,7 @@
 
 ---
 
-## 🚀 Instalasi Cepat
+## Instalasi Cepat
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/djunekz/termux-app-store/master/install.sh | bash
@@ -82,7 +82,7 @@ termux-app-store -h     # Lihat bantuan CLI
 
 ---
 
-## 🖥️ Penggunaan
+## Penggunaan
 
 ### TUI — Antarmuka Interaktif
 ```bash
@@ -143,14 +143,14 @@ Tanpa akun, tanpa tracking, tanpa telemetry — offline sepenuhnya.
 
 ---
 
-## 🔴 Badge Status Package
+## Badge Status Package
 
 | Badge | Keterangan |
 |---|---|
-| 🟢 **NEW** | Package baru (< 7 hari) |
-| 🟡 **UPDATE** | Versi lebih baru tersedia |
-| 🟢 **INSTALLED** | Versi terpasang sudah terkini |
-| 🔴 **UNSUPPORTED** | Dependency tidak tersedia di Termux |
+|  **NEW** | Package baru (< 7 hari) |
+|  **UPDATE** | Versi lebih baru tersedia |
+|  **INSTALLED** | Versi terpasang sudah terkini |
+|  **UNSUPPORTED** | Dependency tidak tersedia di Termux |
 
 ---
 
@@ -198,7 +198,7 @@ TERMUX_PKG_SHA256=""
 
 ---
 
-## 🏗️ Arsitektur
+## Arsitektur
 
 ```
 termux-app-store/
@@ -245,7 +245,7 @@ termux-app-store/
 
 ---
 
-## 📦 Upload Tool ke Termux App Store
+## Upload Tool ke Termux App Store
 
 Ingin mendistribusikan tool kamu ke komunitas Termux?
 
