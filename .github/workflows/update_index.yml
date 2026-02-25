@@ -18,16 +18,16 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           ref: ${{ github.ref }}
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PAT_TOKEN }}
 
       - name: Set up Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.14'
+          python-version: '3.12'
 
       - name: Generate index.json
         run: |
@@ -50,28 +50,24 @@ jobs:
         run: |
           git config --local user.email "258516621+termux-app-store@users.noreply.github.com"
           git config --local user.name "Termux App Store"
-
+          git remote set-url origin https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/djunekz/termux-app-store.git
           git add tools/index.json
           git commit -m "chore: update index.json [skip ci]"
 
           MAX_RETRIES=3
           RETRY=0
-
           while [ $RETRY -lt $MAX_RETRIES ]; do
             if git push origin ${{ github.ref_name }}; then
               echo "✅ Push successful"
               exit 0
             fi
-
             RETRY=$((RETRY + 1))
             echo "Push failed, retry $RETRY/$MAX_RETRIES — pulling rebase..."
-
             if [ $RETRY -lt $MAX_RETRIES ]; then
               git pull --rebase origin ${{ github.ref_name }}
               sleep 3
             fi
           done
-
           echo "❌ Push failed after $MAX_RETRIES attempts"
           exit 1
 
